@@ -153,9 +153,9 @@ EREFINE,ALL,,,3,2,OFF,ON
 	CMSEL,A,crack_face_lower_outer
 	NSLL,S,1
 	ESLN,S,0,ALL
-	CSYS,20
+	CSYS,30
 	ESEL,R,CENT,X,ball_radius_lower-10*micrometer,ball_radius_lower
-	EREFINE,ALL,,,3,0,OFF,ON
+	EREFINE,ALL,,,3,2,OFF,ON
 *ENDIF
 
 ! Select everything
