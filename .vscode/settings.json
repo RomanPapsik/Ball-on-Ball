@@ -1,0 +1,27 @@
+{
+	"editor.insertSpaces": false,
+	"editor.tabSize": 3,
+	"editor.detectIndentation": false,
+	"workbench.colorTheme": "apdl-theme",
+	"files.exclude": {
+		"*.page": true,
+		"*.db": true,
+		"*.dbb": true,
+		"*.err": true,
+		"*.DSP": true,
+		"*.esav": true,
+		"*.mntr": true,
+		"*.full": true,
+		"*.ldhi": true,
+		"*.lock": true,
+		"*.log": true,
+		"/*.mntr": true,
+		"*.r0*": true,
+		"*.rdb": true,
+		"*.stat": true,
+		"*.err": true,
+		"*.gui": true,
+		"*.rst": true,
+		"*.tmp": true
+	}
+}
