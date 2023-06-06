@@ -109,8 +109,10 @@ SSUM
 	ALLSEL,ALL
 
 *ELSE
-	*SET,energy_crackless_lower,energy_crackless_upper
+	*SET,energy_crackless_lower,0
 *ENDIF
+
+*SET,energy_crackless_total,energy_crackless_upper+energy_crackless_lower
 
 /COM,---------------------------------------------------------------------------
 /COM,STRESS FIELD

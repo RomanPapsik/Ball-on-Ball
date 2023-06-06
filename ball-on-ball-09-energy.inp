@@ -88,29 +88,29 @@ NSEL,ALL
 ! Chosen lower crack length
 *SET,crack_length_lower,NINT(loop_lower-1)*crack_increment
 
-! Chosen true crack length
-*IF,loop_lower,EQ,1,THEN
-	*SET,crack_length_lower,0
-*ELSE
+	! Chosen true crack length
+	*IF,loop_lower,EQ,1,THEN
+		*SET,crack_length_lower,0
+	*ELSE
+		CSYS,30
+		NSEL,S,LOC,Y,crack_angle_lower,crack_angle_lower
+		NSEL,R,LOC,X,0,ball_radius_lower-crack_length_lower
+		NSLE,R,CORNER
+		*GET,maximal_node_location,NODE,,MXLOC,X
+		*SET,crack_length_lower,ball_radius_lower-maximal_node_location
+	*ENDIF
+
+	! Node stitching in the lower ball
 	CSYS,30
-	NSEL,S,LOC,Y,crack_angle_lower,crack_angle_lower
+	CMSEL,S,crack_face_lower_inner
+	CMSEL,A,crack_face_lower_outer
+	NSLL,S,1
 	NSEL,R,LOC,X,0,ball_radius_lower-crack_length_lower
-	NSLE,R,CORNER
-	*GET,maximal_node_location,NODE,,MXLOC,X
-	*SET,crack_length_lower,ball_radius_lower-maximal_node_location
-*ENDIF
-
-! Node stitching in the lower ball
-CSYS,30
-CMSEL,S,crack_face_lower_inner
-CMSEL,A,crack_face_lower_outer
-NSLL,S,1
-NSEL,R,LOC,X,0,ball_radius_lower-crack_length_lower
-NUMMRG,NODE,stitching_precision_lower
-NSEL,ALL
+	NUMMRG,NODE,stitching_precision_lower
+	NSEL,ALL
 
 *ELSE
-	*SET,crack_length_lower,crack_length_upper
+	*SET,crack_length_lower,0
 *ENDIF
 
 /COM,---------------------------------------------------------------------------
@@ -192,8 +192,10 @@ ESEL,ALL
 	ESEL,ALL
 
 *ELSE
-	*SET,energy_cracked_lower,energy_cracked_upper
+	*SET,energy_cracked_lower,0
 *ENDIF
+
+*SET,energy_cracked_total,energy_cracked_upper+energy_cracked_lower
 
 /COM,---------------------------------------------------------------------------
 /COM,DISPLACEMENT
@@ -222,15 +224,13 @@ CSYS,20
 	*SET,area_upper,0
 *ENDIF
 
-*IF,simulate_two_balls,EQ,true,THEN
-	*IF,crack_length_lower,GT,0,THEN
-		*SET,area_lower,crack_length_lower*PI*(crack_radius_lower+tip_radius_lower)
-	*ELSE
-		*SET,area_lower,0
-	*ENDIF
+*IF,simulate_two_balls,EQ,true,AND,crack_length_lower,GT,0,THEN
+	*SET,area_lower,crack_length_lower*PI*(crack_radius_lower+tip_radius_lower)
 *ELSE
-	*SET,area_lower,area_upper
+	*SET,area_lower,0
 *ENDIF
+
+*SET,area_total,area_upper+area_lower
 
 /COM,---------------------------------------------------------------------------
 /COM,ENERGY DIFFERENCE
@@ -243,15 +243,13 @@ CSYS,20
 	*SET,energy_difference_upper,0
 *ENDIF
 
-*IF,simulate_two_balls,EQ,true,THEN
-	*IF,crack_length_lower,GT,0,THEN
-		*SET,energy_difference_lower,energy_cracked_lower-energy_crackless_lower
-	*ELSE
-		*SET,energy_difference_lower,0
-	*ENDIF
+*IF,simulate_two_balls,EQ,true,AND,crack_length_lower,GT,0,THEN
+	*SET,energy_difference_lower,energy_cracked_lower-energy_crackless_lower
 *ELSE
-	*SET,energy_difference_lower,energy_difference_upper
+	*SET,energy_difference_lower,0
 *ENDIF
+
+*SET,energy_difference_total,energy_difference_upper+energy_difference_lower
 
 /COM,---------------------------------------------------------------------------
 /COM,ENERGY RELEASE RATE
@@ -264,14 +262,16 @@ CSYS,20
 	*SET,energy_release_upper,0
 *ENDIF
 
-*IF,simulate_two_balls,EQ,true,THEN
-	*IF,crack_length_lower,GT,0,THEN
-		*SET,energy_release_lower,-energy_difference_lower/area_lower
-	*ELSE
-		*SET,energy_release_lower,0
-	*ENDIF
+*IF,simulate_two_balls,EQ,true,AND,crack_length_lower,GT,0,THEN
+	*SET,energy_release_lower,-energy_difference_lower/area_lower
 *ELSE
-	*SET,energy_release_lower,energy_release_upper
+	*SET,energy_release_lower,0
+*ENDIF
+
+*IF,area_total,GT,0,THEN
+	*SET,energy_release_total,-energy_difference_total/area_total
+*ELSE
+	*SET,energy_release_total,0
 *ENDIF
 
 /COM,---------------------------------------------------------------------------

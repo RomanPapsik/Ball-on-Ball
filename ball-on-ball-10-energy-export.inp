@@ -107,28 +107,43 @@ FINISH
 ('"tip_radius_upper":                                ',EN28.9E2,',')
 *VWRITE,tip_radius_lower
 ('"tip_radius_lower":                                ',EN28.9E2,',')
+
+! Crack area
 *VWRITE,area_upper
 ('"area_upper":                                      ',EN28.9E2,',')
 *VWRITE,area_lower
 ('"area_lower":                                      ',EN28.9E2,',')
+*VWRITE,area_total
+('"area_total":                                      ',EN28.9E2,',')
 
 ! Energies
 *VWRITE,energy_crackless_upper
 ('"energy_crackless_upper":                          ',EN28.12E2,',')
 *VWRITE,energy_crackless_lower
 ('"energy_crackless_lower":                          ',EN28.12E2,',')
+*VWRITE,energy_crackless_total
+('"energy_crackless_total":                          ',EN28.12E2,',')
+
 *VWRITE,energy_cracked_upper
 ('"energy_cracked_upper":                            ',EN28.12E2,',')
 *VWRITE,energy_cracked_lower
 ('"energy_cracked_lower":                            ',EN28.12E2,',')
+*VWRITE,energy_cracked_total
+('"energy_cracked_total":                            ',EN28.12E2,',')
+
 *VWRITE,energy_difference_upper
 ('"energy_difference_upper":                         ',EN28.12E2,',')
 *VWRITE,energy_difference_lower
 ('"energy_difference_lower":                         ',EN28.12E2,',')
+*VWRITE,energy_difference_total
+('"energy_difference_total":                         ',EN28.12E2,',')
+
 *VWRITE,energy_release_upper
 ('"energy_release_upper":                            ',EN28.12E2,',')
 *VWRITE,energy_release_lower
-('"energy_release_lower":                            ',EN28.12E2)
+('"energy_release_lower":                            ',EN28.12E2,',')
+*VWRITE,energy_release_total
+('"energy_release_total":                            ',EN28.12E2)
 
 ! Closing bracket
 *VWRITE,
@@ -142,4 +157,4 @@ FINISH
 *CFCLOS
 
 ! Make backup
-SAVE,thefile(1),db,,ALL
+! SAVE,thefile(1),db,,ALL
