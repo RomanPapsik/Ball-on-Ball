@@ -1,0 +1,290 @@
+/COM,===========================================================================
+/COM,CRACKED STATE
+/COM,===========================================================================
+
+FINISH
+
+*IF,simulate_cracks,EQ,true,THEN
+
+/COM,---------------------------------------------------------------------------
+/COM,LOOPS INITIATION
+/COM,---------------------------------------------------------------------------
+
+! Crack increment length
+*SET,crack_increment,1*micrometer!element_size_upper/(3**4)
+*SET,crack_length_limit,10*micrometer
+
+! Number of loops
+*SET,loops_count,NINT(crack_length_limit/crack_increment)+1
+
+! Loop
+*DO,loop_upper,loops_count,1,-1
+*DO,loop_lower,loops_count,1,-1
+/GOPR
+*IF,loop_upper,NE,loop_lower,AND,loop_lower,NE,1,CYCLE
+
+/COM,---------------------------------------------------------------------------
+/COM,RESUME WITH CRACKED MODEL
+/COM,---------------------------------------------------------------------------
+
+! Save parameters
+PARSAV,ALL,parameters,tmp
+! Restore cracked model
+RESUME,cracked,tmp,,0,1
+! Restore parameters
+PARRES,NEW,parameters,tmp
+
+/COM,---------------------------------------------------------------------------
+/COM,RELOAD
+/COM,---------------------------------------------------------------------------
+
+/PREP7
+
+! Remove force
+FDELE,loaded_node,ALL
+! Remove coupling
+CPDELE,ALL,,,ANY
+
+! Prescribe displacement from loaded uncracked state
+CSYS,20
+NSEL,S,LOC,Y,90,90
+NSEL,A,LOC,X,0,0
+CSYS,0
+D,ALL,UY,-downward_displacement_crackless
+NSEL,ALL
+
+/COM,---------------------------------------------------------------------------
+/COM,STITCHING
+/COM,---------------------------------------------------------------------------
+
+/PREP7
+
+! Chosen upper crack length
+*SET,crack_length_upper,NINT(loop_upper-1)*crack_increment
+
+! True upper crack length
+*IF,loop_upper,EQ,1,THEN
+	*SET,crack_length_upper,0
+*ELSE
+	CSYS,20
+	NSEL,S,LOC,Y,crack_angle_upper,crack_angle_upper
+	NSEL,R,LOC,X,0,ball_radius_upper-crack_length_upper
+	NSLE,R,CORNER
+	*GET,maximal_node_location,NODE,,MXLOC,X
+	*SET,crack_length_upper,ball_radius_upper-maximal_node_location
+*ENDIF
+
+! Node stitching in the upper ball
+CSYS,20
+CMSEL,S,crack_face_upper_inner
+CMSEL,A,crack_face_upper_outer
+NSLL,S,1
+NSEL,R,LOC,X,0,ball_radius_upper-crack_length_upper
+NUMMRG,NODE,stitching_precision_upper
+NSEL,ALL
+
+*IF,simulate_two_balls,EQ,true,THEN
+
+! Chosen lower crack length
+*SET,crack_length_lower,NINT(loop_lower-1)*crack_increment
+
+! Chosen true crack length
+*IF,loop_lower,EQ,1,THEN
+	*SET,crack_length_lower,0
+*ELSE
+	CSYS,30
+	NSEL,S,LOC,Y,crack_angle_lower,crack_angle_lower
+	NSEL,R,LOC,X,0,ball_radius_lower-crack_length_lower
+	NSLE,R,CORNER
+	*GET,maximal_node_location,NODE,,MXLOC,X
+	*SET,crack_length_lower,ball_radius_lower-maximal_node_location
+*ENDIF
+
+! Node stitching in the lower ball
+CSYS,30
+CMSEL,S,crack_face_lower_inner
+CMSEL,A,crack_face_lower_outer
+NSLL,S,1
+NSEL,R,LOC,X,0,ball_radius_lower-crack_length_lower
+NUMMRG,NODE,stitching_precision_lower
+NSEL,ALL
+
+*ELSE
+	*SET,crack_length_lower,crack_length_upper
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,SOLVER
+/COM,---------------------------------------------------------------------------
+
+/SOLU
+CSYS,1
+
+! New analysis
+ANTYPE,STATIC,NEW
+
+! Substeps
+AUTOTS,ON
+NSUBST,100,1000,5
+
+! Save all nodal data for every substep
+OUTRES,ALL,ALL
+
+! Direct sparse solver
+EQSLV,SPAR
+DSPOPTION,,INCORE
+
+! Finite deformations
+NLGEOM,ON
+
+! Solve
+ALLSEL,ALL
+/UIS,MSGPOP,3
+SOLVE
+/UIS,MSGPOP,0
+
+/COM,---------------------------------------------------------------------------
+/COM,STRAIN ENERGY
+/COM,---------------------------------------------------------------------------
+
+/POST1
+
+! Select upper ball
+CMSEL,S,ball_upper
+ESLA,S
+ESEL,R,TYPE,,183
+CSYS,1
+RSYS,1
+! Erase element table
+ETABLE,ERAS
+! Fill element table with strain energy
+ETABLE,energ,SENE
+! Sum all element table variables
+SSUM
+! Set sum of strain energy over all elements
+*GET,strain_energy_current,SSUM,0,ITEM,energ
+! Account for symmetry
+*SET,energy_cracked_upper,strain_energy_current
+
+! Select everything
+ESEL,ALL
+
+*IF,simulate_two_balls,EQ,true,THEN
+
+	! Select lower ball
+	CMSEL,S,ball_lower
+	ESLA,S
+	ESEL,R,TYPE,,183
+	CSYS,1
+	RSYS,1
+	! Erase element table
+	ETABLE,ERAS
+	! Fill element table with strain energy
+	ETABLE,energ,SENE
+	! Sum all element table variables
+	SSUM
+	! Set sum of strain energy over all elements
+	*GET,strain_energy_current,SSUM,0,ITEM,energ
+	! Account for symmetry
+	*SET,energy_cracked_lower,strain_energy_current
+
+	! Select everything
+	ESEL,ALL
+
+*ELSE
+	*SET,energy_cracked_lower,energy_cracked_upper
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,DISPLACEMENT
+/COM,---------------------------------------------------------------------------
+
+/POST1
+
+CSYS,20
+*SET,node_id,NODE(0,0,0)
+*SET,downward_displacement,ABS(UX(node_id))
+
+! PLESOL,S,1
+
+/COM,---------------------------------------------------------------------------
+/COM,AREA
+/COM,---------------------------------------------------------------------------
+
+! Radius of the crack tip
+*SET,tip_radius_upper,(ball_radius_upper-crack_length_upper)*SIN(crack_angle_upper)
+*SET,tip_radius_lower,(ball_radius_lower-crack_length_lower)*SIN(crack_angle_lower)
+
+! Area of the crack (cone shape)
+*IF,crack_length_upper,GT,0,THEN
+	*SET,area_upper,crack_length_upper*PI*(crack_radius_upper+tip_radius_upper)
+*ELSE
+	*SET,area_upper,0
+*ENDIF
+
+*IF,simulate_two_balls,EQ,true,THEN
+	*IF,crack_length_lower,GT,0,THEN
+		*SET,area_lower,crack_length_lower*PI*(crack_radius_lower+tip_radius_lower)
+	*ELSE
+		*SET,area_lower,0
+	*ENDIF
+*ELSE
+	*SET,area_lower,area_upper
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,ENERGY DIFFERENCE
+/COM,---------------------------------------------------------------------------
+
+! Energy difference between cracked and crackless states
+*IF,crack_length_upper,GT,0,THEN
+	*SET,energy_difference_upper,energy_cracked_upper-energy_crackless_upper
+*ELSE
+	*SET,energy_difference_upper,0
+*ENDIF
+
+*IF,simulate_two_balls,EQ,true,THEN
+	*IF,crack_length_lower,GT,0,THEN
+		*SET,energy_difference_lower,energy_cracked_lower-energy_crackless_lower
+	*ELSE
+		*SET,energy_difference_lower,0
+	*ENDIF
+*ELSE
+	*SET,energy_difference_lower,energy_difference_upper
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,ENERGY RELEASE RATE
+/COM,---------------------------------------------------------------------------
+
+! Incremental energy release rate
+*IF,crack_length_upper,GT,0,THEN
+	*SET,energy_release_upper,-energy_difference_upper/area_upper
+*ELSE
+	*SET,energy_release_upper,0
+*ENDIF
+
+*IF,simulate_two_balls,EQ,true,THEN
+	*IF,crack_length_lower,GT,0,THEN
+		*SET,energy_release_lower,-energy_difference_lower/area_lower
+	*ELSE
+		*SET,energy_release_lower,0
+	*ENDIF
+*ELSE
+	*SET,energy_release_lower,energy_release_upper
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,EXPORT
+/COM,---------------------------------------------------------------------------
+
+/INPUT,ball-on-ball-10-energy-export,inp
+
+/COM,---------------------------------------------------------------------------
+/COM,END OF LOOPS
+/COM,---------------------------------------------------------------------------
+
+*ENDDO
+*ENDDO
+
+*ENDIF

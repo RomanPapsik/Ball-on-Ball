@@ -1,0 +1,27 @@
+/COM,===========================================================================
+/COM,BALL ON BALL CONTACT WITH CRACKS
+/COM,===========================================================================
+
+! Setup
+/INPUT,ball-on-ball-01-setup,inp
+
+! Material
+/INPUT,ball-on-ball-02-material,inp
+
+! Variables
+/INPUT,ball-on-ball-03-variables,inp
+
+! Geometry
+/INPUT,ball-on-ball-04-geometry,inp
+
+! Mesh
+/INPUT,ball-on-ball-05-mesh,inp
+
+! Boundary conditions
+/INPUT,ball-on-ball-06-boundary,inp
+
+! Stress
+/INPUT,ball-on-ball-07-stress,inp
+
+! Energy
+/INPUT,ball-on-ball-09-energy,inp

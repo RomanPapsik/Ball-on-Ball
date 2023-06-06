@@ -1,0 +1,145 @@
+/COM,===========================================================================
+/COM,EXPORT
+/COM,===========================================================================
+
+FINISH
+
+/COM,---------------------------------------------------------------------------
+/COM,CREATE FILE NAME
+/COM,---------------------------------------------------------------------------
+
+! Create a file name
+*DEL,thefile
+*DIM,thefile,STRING,128
+*SET,thefile(1),'energy-Rbu-%CHRVAL(ball_radius_upper)%-Rbl-%CHRVAL(ball_radius_lower)%-F-%CHRVAL(force)%-Rau-%CHRVAL(crack_radius_upper*1000)%-Ral-%CHRVAL(crack_radius_lower*1000)%-Au-%CHRVAL(crack_length_upper*1000)%-Al-%CHRVAL(crack_length_lower*1000)%'
+
+/COM,---------------------------------------------------------------------------
+/COM,OPEN FILE
+/COM,---------------------------------------------------------------------------
+
+! Open the output JSON file
+*CFOPEN,thefile(1),json
+
+/COM,---------------------------------------------------------------------------
+/COM,WRITE RESULTS
+/COM,---------------------------------------------------------------------------
+
+! Opening bracket
+*VWRITE,
+('{')
+
+! Information about ball material
+*VWRITE,young_modulus
+('"young_modulus":                                   ',EN28.9E2,',')
+*VWRITE,poisson_ratio
+('"poisson_ratio":                                   ',EN28.9E2,',')
+
+! Information about options
+*VWRITE,simulate_two_balls
+('"simulate_two_balls":                              ',EN28.1E2,',')
+*VWRITE,simulate_cracks
+('"simulate_cracks":                                 ',EN28.1E2,',')
+*VWRITE,displacement_controlled
+('"displacement_controlled":                         ',EN28.1E2,',')
+
+! Information about geometry
+*VWRITE,ball_radius_upper
+('"ball_radius_upper":                               ',EN28.9E2,',')
+*VWRITE,ball_radius_lower
+('"ball_radius_lower":                               ',EN28.9E2,',')
+
+! Information about load
+*VWRITE,force
+('"force":                                           ',EN28.9E2,',')
+*VWRITE,downward_displacement
+('"downward_displacement":                           ',EN28.9E2,',')
+
+! Information about contact
+*VWRITE,effective_compliance
+('"effective_compliance":                            ',EN28.9E2,',')
+*VWRITE,effective_stiffness
+('"effective_stiffness":                             ',EN28.9E2,',')
+*VWRITE,effective_curvature
+('"effective_curvature":                             ',EN28.9E2,',')
+*VWRITE,effective_radius
+('"effective_radius":                                ',EN28.9E2,',')
+*VWRITE,contact_radius
+('"contact_radius":                                  ',EN28.9E2,',')
+*VWRITE,contact_angle_upper
+('"contact_angle_upper":                             ',EN28.9E2,',')
+*VWRITE,contact_angle_lower
+('"contact_angle_lower":                             ',EN28.9E2,',')
+*VWRITE,contact_arc_length_upper
+('"contact_arc_length_upper":                        ',EN28.9E2,',')
+*VWRITE,contact_arc_length_lower
+('"contact_arc_length_lower":                        ',EN28.9E2,',')
+*VWRITE,mean_pressure
+('"mean_pressure":                                   ',EN28.9E2,',')
+*VWRITE,maximum_pressure
+('"maximum_pressure":                                ',EN28.9E2,',')
+*VWRITE,maximum_stress
+('"maximum_stress":                                  ',EN28.9E2,',')
+
+! Information about mesh
+*VWRITE,nodes_count
+('"nodes_count":                                     ',EN28.9E2,',')
+*VWRITE,elements_count
+('"elements_count":                                  ',EN28.9E2,',')
+
+! Information about crack
+*VWRITE,crack_radius_upper
+('"crack_radius_upper":                              ',EN28.9E2,',')
+*VWRITE,crack_radius_lower
+('"crack_radius_lower":                              ',EN28.9E2,',')
+*VWRITE,crack_angle_upper
+('"crack_angle_upper":                               ',EN28.9E2,',')
+*VWRITE,crack_angle_lower
+('"crack_angle_lower":                               ',EN28.9E2,',')
+*VWRITE,crack_arc_length_upper
+('"crack_arc_length_upper":                          ',EN28.9E2,',')
+*VWRITE,crack_arc_length_lower
+('"crack_arc_length_lower":                          ',EN28.9E2,',')
+*VWRITE,crack_length_upper
+('"crack_length_upper":                              ',EN28.9E2,',')
+*VWRITE,crack_length_lower
+('"crack_length_lower":                              ',EN28.9E2,',')
+*VWRITE,tip_radius_upper
+('"tip_radius_upper":                                ',EN28.9E2,',')
+*VWRITE,tip_radius_lower
+('"tip_radius_lower":                                ',EN28.9E2,',')
+*VWRITE,area_upper
+('"area_upper":                                      ',EN28.9E2,',')
+*VWRITE,area_lower
+('"area_lower":                                      ',EN28.9E2,',')
+
+! Energies
+*VWRITE,energy_crackless_upper
+('"energy_crackless_upper":                          ',EN28.12E2,',')
+*VWRITE,energy_crackless_lower
+('"energy_crackless_lower":                          ',EN28.12E2,',')
+*VWRITE,energy_cracked_upper
+('"energy_cracked_upper":                            ',EN28.12E2,',')
+*VWRITE,energy_cracked_lower
+('"energy_cracked_lower":                            ',EN28.12E2,',')
+*VWRITE,energy_difference_upper
+('"energy_difference_upper":                         ',EN28.12E2,',')
+*VWRITE,energy_difference_lower
+('"energy_difference_lower":                         ',EN28.12E2,',')
+*VWRITE,energy_release_upper
+('"energy_release_upper":                            ',EN28.12E2,',')
+*VWRITE,energy_release_lower
+('"energy_release_lower":                            ',EN28.12E2)
+
+! Closing bracket
+*VWRITE,
+('}')
+
+/COM,---------------------------------------------------------------------------
+/COM,CLOSE FILE
+/COM,---------------------------------------------------------------------------
+
+! Close file
+*CFCLOS
+
+! Make backup
+SAVE,thefile(1),db,,ALL

@@ -1,0 +1,28 @@
+/COM,===========================================================================
+/COM,MATERIAL PROPERTIES
+/COM,===========================================================================
+
+/PREP7
+
+/COM,---------------------------------------------------------------------------
+/COM,SILICON NITRIDE
+/COM,---------------------------------------------------------------------------
+
+*SET,material_ball,1
+
+! Young's modulus
+*SET,young_modulus,304*gigapascal
+MP,EX,material_ball,young_modulus
+
+! Poisson's ratio
+*SET,poisson_ratio,0.268
+MP,PRXY,material_ball,poisson_ratio
+
+/COM,---------------------------------------------------------------------------
+/COM,EFFECTIVE STIFFNESS
+/COM,---------------------------------------------------------------------------
+
+! Compliance
+*SET,effective_compliance,2*(1-poisson_ratio**2)/young_modulus
+! Stiffness
+*SET,effective_stiffness,1/effective_compliance
