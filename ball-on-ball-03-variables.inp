@@ -17,15 +17,33 @@
 /COM,LOAD
 /COM,---------------------------------------------------------------------------
 
+! Check status of command line
+*GET,variable_status,PARM,force,TYPE
 ! Force applied to the upper ball
-*SET,force,5874*newton
+*IF,variable_status,EQ,0,THEN
+	! Take the command-line value
+	*SET,force,force*newton
+*ELSE
+	! Take default value
+	*SET,force,5874*newton
+*ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,BALLS
 /COM,---------------------------------------------------------------------------
 
+! Check status of command line
+*GET,variable_status,PARM,ball_radii,TYPE
 ! Radii of the balls
-*SET,ball_radii,7.935/2*millimeter
+*IF,variable_status,EQ,0,THEN
+	! Take the command-line value
+	*SET,ball_radii,ball_radii*millimeter
+*ELSE
+	! Take default value
+	*SET,ball_radii,7.935/2*millimeter
+*ENDIF
+
+! Radii of the balls are equal (can be different)
 *SET,ball_radius_upper,ball_radii
 *SET,ball_radius_lower,ball_radii
 
@@ -69,7 +87,7 @@
 /COM,CRACK
 /COM,---------------------------------------------------------------------------
 
-! Crack angle deviation from the perpendicularity to surface
+! Crack angle deviation from the perpendicularity to surface (not implemented)
 *AFUN,DEG
 *SET,crack_deviation_angle_upper,0
 *SET,crack_deviation_angle_lower,0
