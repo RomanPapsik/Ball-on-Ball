@@ -46,7 +46,11 @@ EQSLV,SPAR
 DSPOPTION,,INCORE
 
 ! Finite deformations
-NLGEOM,ON
+*IF,large_deformations,EQ,true,THEN
+	NLGEOM,ON
+*ELSE
+	NLGEOM,OFF
+*ENDIF
 
 ! Solve
 ALLSEL,ALL

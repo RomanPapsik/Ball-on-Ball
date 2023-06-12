@@ -12,7 +12,7 @@ FINISH
 
 ! Crack increment length
 *SET,crack_increment,1*micrometer!element_size_upper/(3**4)
-*SET,crack_length_limit,10*micrometer
+*SET,crack_length_limit,15*micrometer
 
 ! Number of loops
 *SET,loops_count,NINT(crack_length_limit/crack_increment)+1
@@ -135,7 +135,11 @@ EQSLV,SPAR
 DSPOPTION,,INCORE
 
 ! Finite deformations
-NLGEOM,ON
+*IF,large_deformations,EQ,true,THEN
+	NLGEOM,ON
+*ELSE
+	NLGEOM,OFF
+*ENDIF
 
 ! Solve
 ALLSEL,ALL
@@ -206,8 +210,6 @@ ESEL,ALL
 CSYS,20
 *SET,node_id,NODE(0,0,0)
 *SET,downward_displacement,ABS(UX(node_id))
-
-! PLESOL,S,1
 
 /COM,---------------------------------------------------------------------------
 /COM,AREA

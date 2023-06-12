@@ -11,7 +11,7 @@ FINISH
 ! Create a file name
 *DEL,thefile
 *DIM,thefile,STRING,128
-*SET,thefile(1),'stress-Rbu-%CHRVAL(ball_radius_upper)%-Rbl-%CHRVAL(ball_radius_lower)%-F-%CHRVAL(force)%'
+*SET,thefile(1),'stress-Rbu-%CHRVAL(ball_radius_upper)%-Rbl-%CHRVAL(ball_radius_lower)%-F-%CHRVAL(force)%-Rau-%CHRVAL(crack_radius_upper*1000)%'
 
 /COM,---------------------------------------------------------------------------
 /COM,OPEN FILE
@@ -85,6 +85,11 @@ FINISH
 ('"nodes_count":                                     ',EN28.9E2,',')
 *VWRITE,elements_count
 ('"elements_count":                                  ',EN28.9E2,',')
+
+*VWRITE,crack_radius_upper
+('"crack_radius_upper":                              ',EN28.9E2,',')
+*VWRITE,crack_angle_upper
+('"crack_angle_upper":                               ',EN28.9E2,',')
 
 *VWRITE,
 ('"path_on_surface": [')

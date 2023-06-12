@@ -11,6 +11,7 @@
 *SET,simulate_two_balls,true
 *SET,simulate_cracks,true
 *SET,displacement_controlled,true
+*SET,large_deformations,true
 
 /COM,---------------------------------------------------------------------------
 /COM,LOAD
@@ -74,8 +75,8 @@
 *SET,crack_deviation_angle_lower,0
 
 ! Crack radius can be larger than the contact radius
-*SET,crack_radius_upper,contact_radius*1.1
-*SET,crack_radius_lower,contact_radius*1.1
+*SET,crack_radius_upper,contact_radius*1.05
+*SET,crack_radius_lower,contact_radius*1.05
 
 ! Crack half angle from axis
 *AFUN,DEG
