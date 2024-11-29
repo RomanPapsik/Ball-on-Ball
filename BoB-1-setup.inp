@@ -84,14 +84,14 @@ SELTOL,nanometer/10
 /COM,ABBREVIATIONS
 /COM,---------------------------------------------------------------------------
 
-*ABBR,'RESTART',/INPUT,ball-on-ball-00,inp
-*ABBR,'SETUP',/INPUT,ball-on-ball-01-setup,inp
-*ABBR,'MATERIAL',/INPUT,ball-on-ball-02-material,inp
-*ABBR,'VARIABLES',/INPUT,ball-on-ball-03-variables,inp
-*ABBR,'GEOMETRY',/INPUT,ball-on-ball-04-geometry,inp
-*ABBR,'MESH',/INPUT,ball-on-ball-05-mesh,inp
-*ABBR,'BOUNDARY',/INPUT,ball-on-ball-06-boundary,inp
-*ABBR,'STRESS',/INPUT,ball-on-ball-07-stress,inp
-*ABBR,'EXPORTSTRESS',/INPUT,ball-on-ball-08-stress-export,inp
-*ABBR,'ENERGY',/INPUT,ball-on-ball-09-energy,inp
-*ABBR,'EXPORTENERGY',/INPUT,ball-on-ball-10-energy-export,inp
+*ABBR,'RESTART',/INPUT,BoB-00,inp
+*ABBR,'SETUP',/INPUT,BoB-1-setup,inp
+*ABBR,'CONFIG',/INPUT,BoB-2-configuration-Pasterk,inp
+*ABBR,'MATERIAL',/INPUT,BoB-3-materials,inp
+*ABBR,'GEOMETRY',/INPUT,BoB-4-geometry,inp
+*ABBR,'MESH',/INPUT,BoB-5-mesh,inp
+*ABBR,'BC',/INPUT,BoB-6-BC,inp
+*ABBR,'STRESS',/INPUT,BoB-7-stress,inp
+*ABBR,'EXPORTSTRESS',/INPUT,BoB-7-stress-export,inp
+*ABBR,'ENERGY',/INPUT,BoB-9-energy,inp
+*ABBR,'EXPORTENERGY',/INPUT,ball-on-ball-8-energy-export,inp
