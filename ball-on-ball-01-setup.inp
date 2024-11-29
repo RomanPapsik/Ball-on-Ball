@@ -71,7 +71,7 @@ SELTOL,nanometer/10
 /ANG,1,0
 
 ! Do not scale displacements
-/DSCALE,1,1
+/DSCALE,ALL,1
 
 /COM,---------------------------------------------------------------------------
 /COM,COLOR MAP
