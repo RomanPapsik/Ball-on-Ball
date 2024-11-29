@@ -3,25 +3,25 @@
 /COM,===========================================================================
 
 ! Setup
-/INPUT,ball-on-ball-01-setup,inp
+/INPUT,BoB-1-setup,inp
 
-! Material
-/INPUT,ball-on-ball-02-material,inp
+! Configuration file
+/INPUT,BoB-2-configuration-Pasterk,inp
 
-! Variables
-/INPUT,ball-on-ball-03-variables,inp
+! Materials
+/INPUT,BoB-3-materials,inp
 
 ! Geometry
-/INPUT,ball-on-ball-04-geometry,inp
+/INPUT,BoB-4-geometry,inp
 
 ! Mesh
-/INPUT,ball-on-ball-05-mesh,inp
+/INPUT,BoB-5-mesh,inp
 
 ! Boundary conditions
-/INPUT,ball-on-ball-06-boundary,inp
+/INPUT,BoB-6-BCs,inp
 
 ! Stress
-/INPUT,ball-on-ball-07-stress,inp
+/INPUT,BoB-7-stress,inp
 
 ! Energy
-/INPUT,ball-on-ball-09-energy,inp
+/INPUT,BoB-8-energy,inp
