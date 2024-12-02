@@ -5,24 +5,21 @@
 /PREP7
 
 /COM,---------------------------------------------------------------------------
-/COM,SILICON NITRIDE
+/COM,LOWER BALL
 /COM,---------------------------------------------------------------------------
 
-*SET,material_ball,1
-
+*SET,material_lower,1
 ! Young's modulus
-*SET,young_modulus,304*gigapascal
-MP,EX,material_ball,young_modulus
-
+MP,EX,material_lower,young_modulus
 ! Poisson's ratio
-*SET,poisson_ratio,0.268
-MP,PRXY,material_ball,poisson_ratio
+MP,PRXY,material_lower,poisson_ratio
 
 /COM,---------------------------------------------------------------------------
-/COM,EFFECTIVE STIFFNESS
+/COM,UPPER BALL
 /COM,---------------------------------------------------------------------------
 
-! Compliance
-*SET,effective_compliance,2*(1-poisson_ratio**2)/young_modulus
-! Stiffness
-*SET,effective_stiffness,1/effective_compliance
+*SET,material_upper,2
+! Young's modulus
+MP,PRXY,material_upper,young_modulus
+! Poisson's ratio
+MP,PRXY,material_upper,poisson_ratio
