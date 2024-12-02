@@ -24,6 +24,14 @@
 /COM,MATERIAL
 /COM,---------------------------------------------------------------------------
 
+! Name of the lower ball material
+*DIM,material_name_lower,STRING,5
+*SET,material_name_lower(1),'Si3N4'
+
+! Name of the lower ball material
+*DIM,material_name_upper,STRING,5
+*SET,material_name_upper(1),'Si3N4'
+
 ! Young's modulus
 *SET,young_modulus_lower,304*gigapascal
 *SET,young_modulus_upper,304*gigapascal
