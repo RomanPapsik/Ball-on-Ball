@@ -5,11 +5,12 @@
 ! Setup
 /INPUT,BoB-1-setup,inp
 
-! Configuration file
+! Configuration files
 /INPUT,BoB-2-configuration-Pasterk,inp
+! /INPUT,BoB-2-configuration-Munz,inp
 
 ! Materials
-/INPUT,BoB-3-materials,inp
+/INPUT,BoB-3-material,inp
 
 ! Geometry
 /INPUT,BoB-4-geometry,inp
