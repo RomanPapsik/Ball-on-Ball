@@ -1,111 +1,85 @@
 /COM,===========================================================================
-/COM,VARIABLES
+/COM,CONFIGURATION
 /COM,===========================================================================
 
 /PREP7
 
 /COM,---------------------------------------------------------------------------
-/COM,OPTIONS
+/COM,SWITCHES
 /COM,---------------------------------------------------------------------------
 
+! If both balls are the the same, only one is required to obtain stresses
 *SET,simulate_two_balls,true
+
+! Obtain also energy release rates
 *SET,simulate_cracks,true
+
+! Should force or displacement act on the ball
 *SET,displacement_controlled,true
-*SET,large_deformations,true
+
+! Consider large deformations as geometric non-linearities
+*SET,large_deformations,false
 
 /COM,---------------------------------------------------------------------------
-/COM,LOAD
+/COM,MATERIAL
 /COM,---------------------------------------------------------------------------
 
-! Check status of command line
-*GET,variable_status,PARM,force,TYPE
-! Force applied to the upper ball
-*IF,variable_status,EQ,0,THEN
-	! Take the command-line value
-	*SET,force,force*newton
-*ELSE
+! Young's modulus
+*SET,young_modulus_lower,304*gigapascal
+*SET,young_modulus_upper,304*gigapascal
+
+! Poisson's ratio
+*SET,poisson_ratio_lower,0.268
+*SET,poisson_ratio_upper,0.268
+
+/COM,---------------------------------------------------------------------------
+/COM,FORCE MAGNITUDE
+/COM,---------------------------------------------------------------------------
+
+*IF,Fc,LE,0,THEN
 	! Take default value
 	*SET,force,5874*newton
-*ENDIF
-
-/COM,---------------------------------------------------------------------------
-/COM,BALLS
-/COM,---------------------------------------------------------------------------
-
-! Check status of command line
-*GET,variable_status,PARM,ball_radii,TYPE
-! Radii of the balls
-*IF,variable_status,EQ,0,THEN
-	! Take the command-line value
-	*SET,ball_radii,ball_radii*millimeter
 *ELSE
-	! Take default value
-	*SET,ball_radii,7.935/2*millimeter
+	! Take command line value
+	*SET,force,Fc*newton
 *ENDIF
 
-! Radii of the balls are equal (can be different)
-*SET,ball_radius_upper,ball_radii
-*SET,ball_radius_lower,ball_radii
-
 /COM,---------------------------------------------------------------------------
-/COM,HERTZIAN CONTACT
+/COM,BALL RADII
 /COM,---------------------------------------------------------------------------
 
-! Effective curvature
-*SET,effective_curvature,1/ball_radius_upper+1/ball_radius_lower
+*IF,RbL,LE,0,THEN
+	! Take default value
+	*SET,ball_radius_lower,7.935/2*millimeter
+*ELSE
+	! Take command line value
+	*SET,ball_radius_lower,RbL*millimeter
+*ENDIF
 
-! Effective radiusVenus from Willendorf
-*SET,effective_radius,1/effective_curvature
-
-! Contact radius
-*SET,contact_radius,((3*force*effective_radius)/(4*effective_stiffness))**(1/3)
-
-! Mean contact pressure
-*SET,mean_pressure,force/(PI*contact_radius**2)
-
-! Maximum contact pressure
-*SET,maximum_pressure,3*mean_pressure/2
-
-! Maximum radial stress
-*SET,maximum_stress,(1-2*poisson_ratio)*mean_pressure/2
-
-! Contact half angle from axis
-*AFUN,DEG
-*SET,contact_angle_upper,ASIN(contact_radius/ball_radius_upper)
-*SET,contact_angle_lower,ASIN(contact_radius/ball_radius_lower)
-
-! Contact arc length
-*SET,contact_arc_length_upper,ball_radius_upper*contact_angle_upper*PI/180
-*SET,contact_arc_length_lower,ball_radius_lower*contact_angle_lower*PI/180
-
-! Contact sagitta (height from symmetry line)
-*AFUN,DEG
-*SET,contact_sagitta_upper,ball_radius_upper*(1-COS(contact_angle_upper))
-*SET,contact_sagitta_lower,ball_radius_lower*(1-COS(contact_angle_lower))
+*IF,RbU,LE,0,THEN
+	! Take default value
+	*SET,ball_radius_upper,ball_radius_lower
+*ELSE
+	! Take command line value
+	*SET,ball_radius_lower,RbU*millimeter
+*ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,CRACK
 /COM,---------------------------------------------------------------------------
 
-! Crack angle deviation from the perpendicularity to surface
+! Crack radius
+*IF,RaL,LE,0,AND,RaRcL,LE,0,THEN
+	! Take default value
+	*SET,crack_multiplier_lower,1.1
+*ENDIF
+
+*IF,RaL,LE,0,AND,RaRcL,LE,0,THEN
+	! Take default value
+	*SET,crack_multiplier_upper,crack_multiplier_lower
+*ENDIF
+
+! Crack angle declination from the surface
 *AFUN,DEG
-*SET,crack_deviation_angle_upper,0
-*SET,crack_deviation_angle_lower,0
-
-! Crack radius can be larger than the contact radius
-*SET,crack_radius_upper,contact_radius*1.1
-*SET,crack_radius_lower,contact_radius*1.1
-
-! Crack half angle from axis
-*AFUN,DEG
-*SET,crack_angle_upper,ASIN(crack_radius_upper/ball_radius_upper)
-*SET,crack_angle_lower,ASIN(crack_radius_lower/ball_radius_lower)
-
-! Crack arc length
-*SET,crack_arc_length_upper,ball_radius_upper*crack_angle_upper*PI/180
-*SET,crack_arc_length_lower,ball_radius_lower*crack_angle_lower*PI/180
-
-! Crack sagitta (height from symmetry line)
-*AFUN,DEG
-*SET,crack_sagitta_upper,ball_radius_upper*(1-COS(crack_angle_upper))
-*SET,crack_sagitta_lower,ball_radius_lower*(1-COS(crack_angle_lower))
+*SET,crack_declination_lower,0
+*SET,crack_declination_upper,0
