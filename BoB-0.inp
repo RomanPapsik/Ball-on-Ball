@@ -9,20 +9,23 @@
 /INPUT,BoB-2-configuration-Pasterk,inp
 ! /INPUT,BoB-2-configuration-Munz,inp
 
-! Materials
-/INPUT,BoB-3-material,inp
+! Hertz theory
+/INPUT,BoB-3-Hertz,inp
+
+! Material
+/INPUT,BoB-4-material,inp
 
 ! Geometry
-/INPUT,BoB-4-geometry,inp
+/INPUT,BoB-5-geometry,inp
 
 ! Mesh
-/INPUT,BoB-5-mesh,inp
+/INPUT,BoB-6-mesh,inp
 
 ! Boundary conditions
-/INPUT,BoB-6-BCs,inp
+/INPUT,BoB-7-BCs,inp
 
 ! Stress
-/INPUT,BoB-7-stress,inp
+/INPUT,BoB-8-stress,inp
 
 ! Energy
-/INPUT,BoB-8-energy,inp
+/INPUT,BoB-9-energy,inp

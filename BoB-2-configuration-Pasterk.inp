@@ -9,13 +9,13 @@
 /COM,---------------------------------------------------------------------------
 
 ! If both balls are the the same, only one is required to obtain stresses
-*SET,simulate_two_balls,true
+*SET,simulate_two_balls,false
 
 ! Obtain also energy release rates
-*SET,simulate_cracks,true
+*SET,simulate_cracks,false
 
 ! Should force or displacement act on the ball
-*SET,displacement_controlled,true
+*SET,displacement_controlled,false
 
 ! Consider large deformations as geometric non-linearities
 *SET,large_deformations,false
