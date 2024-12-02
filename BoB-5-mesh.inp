@@ -5,11 +5,12 @@
 /PREP7
 
 /COM,---------------------------------------------------------------------------
-/COM,STRUCTURAL ELEMENTS
+/COM,STRUCTURAL ELEMENT
 /COM,---------------------------------------------------------------------------
 
-! 2D quadratic element
+! 2D quadrilateral quadratic element
 ET,183,PLANE183
+
 ! Axisymmetric formulation
 KEYOPT,183,3,1
 
