@@ -8,18 +8,20 @@
 /COM,LOWER BALL
 /COM,---------------------------------------------------------------------------
 
+! Unique number
 *SET,material_lower,1
 ! Young's modulus
-MP,EX,material_lower,young_modulus
+MP,EX,material_lower,young_modulus_lower
 ! Poisson's ratio
-MP,PRXY,material_lower,poisson_ratio
+MP,PRXY,material_lower,poisson_ratio_lower
 
 /COM,---------------------------------------------------------------------------
 /COM,UPPER BALL
 /COM,---------------------------------------------------------------------------
 
+! Unique number
 *SET,material_upper,2
 ! Young's modulus
-MP,PRXY,material_upper,young_modulus
+MP,EX,material_upper,young_modulus_upper
 ! Poisson's ratio
-MP,PRXY,material_upper,poisson_ratio
+MP,PRXY,material_upper,poisson_ratio_upper

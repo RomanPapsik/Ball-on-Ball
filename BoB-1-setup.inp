@@ -40,37 +40,36 @@ FINISH
 /COM,---------------------------------------------------------------------------
 
 ! Length
-*SET,meter     ,1*1000
+*SET,micrometer,1E-3
 *SET,millimeter,1
-*SET,micrometer,1/1000
-*SET,nanometer ,1/1000/1000
+*SET,meter,1E3
 
 ! Force
 *SET,newton,1
 
 ! Pressure
-*SET,gigapascal,1*1000
 *SET,megapascal,1
+*SET,gigapascal,1E3
 
 /COM,---------------------------------------------------------------------------
 /COM,TOLERANCE
 /COM,---------------------------------------------------------------------------
 
 ! Initial tolerance for boolean operations
-BTOL,nanometer/10
+BTOL,micrometer/1000
 
 ! Initial tolerance for selections
-SELTOL,nanometer/10
+SELTOL,micrometer/1000
 
 /COM,---------------------------------------------------------------------------
 /COM,VIEW
 /COM,---------------------------------------------------------------------------
 
-! Rotate view
-/VIEW,1,0,0,+1
-/ANG,1,0
-
-! Do not scale displacements
+! View direction
+/VIEW,ALL,0,0,+1
+! View rotation
+/ANGLE,ALL,0
+! Displacement scaling
 /DSCALE,ALL,1
 
 /COM,---------------------------------------------------------------------------
@@ -84,14 +83,15 @@ SELTOL,nanometer/10
 /COM,ABBREVIATIONS
 /COM,---------------------------------------------------------------------------
 
-*ABBR,'RESTART',/INPUT,BoB-00,inp
+*ABBR,'RESTART',/INPUT,BoB-0,inp
 *ABBR,'SETUP',/INPUT,BoB-1-setup,inp
 *ABBR,'CONFIG',/INPUT,BoB-2-configuration-Pasterk,inp
-*ABBR,'MATERIAL',/INPUT,BoB-3-materials,inp
-*ABBR,'GEOMETRY',/INPUT,BoB-4-geometry,inp
-*ABBR,'MESH',/INPUT,BoB-5-mesh,inp
-*ABBR,'BC',/INPUT,BoB-6-BC,inp
-*ABBR,'STRESS',/INPUT,BoB-7-stress,inp
-*ABBR,'EXPORTSTRESS',/INPUT,BoB-7-stress-export,inp
+*ABBR,'HERTZ',/INPUT,BoB-3-Hertz,inp
+*ABBR,'MATERIAL',/INPUT,BoB-4-material,inp
+*ABBR,'GEOMETRY',/INPUT,BoB-5-geometry,inp
+*ABBR,'MESH',/INPUT,BoB-6-mesh,inp
+*ABBR,'BC',/INPUT,BoB-4-BCs,inp
+*ABBR,'STRESS',/INPUT,BoB-8-stress,inp
+*ABBR,'STRESS_EXP',/INPUT,BoB-8-stress-export,inp
 *ABBR,'ENERGY',/INPUT,BoB-9-energy,inp
-*ABBR,'EXPORTENERGY',/INPUT,ball-on-ball-8-energy-export,inp
+*ABBR,'ENERGY_EXP',/INPUT,ball-on-ball-9-energy-export,inp

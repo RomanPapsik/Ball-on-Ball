@@ -5,29 +5,116 @@
 /PREP7
 
 ! Initial gap between balls
-*SET,initial_gap,0
+*SET,initial_gap,1*millimeter
 
-! Auxiliary radius for intersections
-*SET,auxiliary_radius_upper,ball_radius_upper-2*contact_arc_length_upper
-*SET,auxiliary_radius_lower,ball_radius_lower-2*contact_arc_length_lower
+/COM,---------------------------------------------------------------------------
+/COM,AUXILIARY COORDINATE SYSTEMS
+/COM,---------------------------------------------------------------------------
 
-
-! Intersection angle (for ball with half-size ball)
 *AFUN,DEG
-*SET,intersection_angle_small,75.52248781407008
 
-! Local coordinates
-*AFUN,DEG
-LOCAL,20,SPHE,0,+ball_radius_upper+initial_gap/2,0,-90
-LOCAL,21,SPHE,0,+initial_gap/2,0,90,180
-LOCAL,30,SPHE,0,-ball_radius_lower-initial_gap/2,0,90,180
-LOCAL,31,SPHE,0,-initial_gap/2,0,-90
+! Spherical at the lower ball centre
+*SET,cs_ball_lower,100
+LOCAL,cs_ball_lower,SPHE,0,-ball_radius_lower-initial_gap/2,0,90,180
+
+! Spherical at the upper ball centre
+*SET,cs_ball_upper,200
+LOCAL,cs_ball_upper,SPHE,0,+ball_radius_upper+initial_gap/2,0,-90
+
+! Spherical at the lower ball surface
+*SET,cs_ball_lower_surface,110
+LOCAL,cs_ball_lower_surface,SPHE,0,-initial_gap/2,0,-90
+
+! Spherical at the upper ball surface
+*SET,cs_ball_upper_surface,220
+LOCAL,cs_ball_upper_surface,SPHE,0,+initial_gap/2,0,90,180
+
+! Cartesian at the lower crack origin
+*SET,cs_crack_lower,111
+LOCAL,cs_crack_lower,CART,x0,y0,z0,crack_angle
+
+! Cartesian at the upper crack origin
+*SET,cs_crack_upper,222
+LOCAL,cs_crack_upper,CART,x0,y0,z0,crack_angle
+
+/COM,---------------------------------------------------------------------------
+/COM,LOWER BALL
+/COM,---------------------------------------------------------------------------
+
+! Centre keypoint
+CSYS,cs_ball_lower
+K,100,0,0
+! Circumference keypoints
+K,101,ball_radius_lower,0
+K,102,ball_radius_lower,90
+! Contact vicinity outer
+K,111,ball_radius_lower,+1*crack_angle_lower
+K,112,ball_radius_lower,+1*crack_angle_lower
+K,113,ball_radius_lower,+2*crack_angle_lower
+! Contact vicinity middle
+K,121,ball_radius_lower-1*contact_arc_length_lower,0
+K,122,ball_radius_lower-1*contact_arc_length_lower,+1*crack_angle_lower
+K,123,ball_radius_lower-1*contact_arc_length_lower,+2*crack_angle_lower
+! Contact vicinity inner
+K,131,ball_radius_lower-2*contact_arc_length_lower,0
+K,132,ball_radius_lower-2*contact_arc_length_lower,+1*crack_angle_lower
+K,133,ball_radius_lower-2*contact_arc_length_lower,+2*crack_angle_lower
+! Faraway keypoints
+CSYS,0
+KBETW,100,131,141,RATIO,0.5
+KBETW,100,102,142,RATIO,0.5
+CSYS,cs_ball_lower
+KBETW,113,102,143,RATIO,DISTKP(131,141)/DISTKP(113,102)
+BSPLIN,141,143,,,,,1,-90,0,1,KY(143),0
+LDIV,LSNEXT(0),0.5,144,2,0
+CSYS,0
+L,133,144
+BSPLIN,142,144,,,,,0,-1,0,KX(133)-KX(144),KY(133)-KY(144),0
+
+! Vicinity areas
+CSYS,cs_ball_lower
+A,101,111,122,121
+A,121,122,132,131
+A,122,123,133,132
+*IF,simulate_cracks,EQ,false,THEN
+	! Close the crack
+	A,122,123,113,111
+*ELSE
+	! Let the crack be open
+	A,122,123,113,112
+*ENDIF
+! Faraway areas
+A,131,141,144,133,132
+A,133,144,143,113,123
+A,100,141,144,142
+A,142,144,143,102
+
+! Concatenation for meshing
+CSYS,cs_ball_lower
+LSEL,S,LOC,X,ball_radius_lower-2*contact_arc_length_lower,ball_radius_lower-2*contact_arc_length_lower
+LSEL,R,LOC,Y,0,2*crack_angle_lower
+LCCAT,ALL
+LSEL,S,LOC,X,ball_radius_lower-contact_arc_length_lower*2,ball_radius_lower
+LSEL,R,LOC,Y,2*crack_angle_lower,2*crack_angle_lower
+LCCAT,ALL
+
+! Select everything
+ALLSEL,ALL
 
 /COM,---------------------------------------------------------------------------
 /COM,UPPER BALL
 /COM,---------------------------------------------------------------------------
 
-CSYS,20
+*IF,simulate_two_balls,EQ,true,THEN
+
+! Auxiliary radius for intersections
+*SET,auxiliary_radius_upper,ball_radius_upper-2*contact_arc_length_upper
+*SET,auxiliary_radius_lower,ball_radius_lower-2*contact_arc_length_lower
+
+! Intersection angle (for ball with half-size ball)
+*SET,intersection_angle_small,75.52248781407008
+
+CSYS,cs_ball_upper
 K,211,ball_radius_upper,0
 K,212,ball_radius_upper,crack_angle_upper
 K,242,ball_radius_upper,crack_angle_upper
@@ -42,13 +129,13 @@ CSYS,21
 K,221,ball_radius_upper/2,0
 K,222,ball_radius_upper/2,intersection_angle_small/2
 K,223,ball_radius_upper/2,intersection_angle_small
-CSYS,20
+CSYS,cs_ball_upper
 K,231,0,90
 K,232,ball_radius_upper/2,90
 K,233,ball_radius_upper,90
 
 ! Near areas
-CSYS,20
+CSYS,cs_ball_upper
 A,211,212,215,214
 *IF,simulate_cracks,EQ,true,THEN
 A,242,213,216,215
@@ -61,27 +148,27 @@ A,214,215,218,217
 ! Intermediate areas
 CSYS,0
 L,219,222
-CSYS,20
+CSYS,cs_ball_upper
 L,213,223
 L,217,221
 CSYS,21
 L,221,222
 L,222,223
-CSYS,20
+CSYS,cs_ball_upper
 A,213,223,222,219,216
 A,217,218,219,222,221
 
 ! Distant areas
 CSYS,21
 BSPLIN,222,232,,,,,1,intersection_angle_small/2+180,,1,0
-CSYS,20
+CSYS,cs_ball_upper
 L,223,233
 L,221,231
 A,223,233,232,222
 A,221,222,232,231
 
 ! Concatenation for meshing
-CSYS,20
+CSYS,cs_ball_upper
 LSEL,S,LOC,X,ball_radius_upper-2*contact_arc_length_upper,ball_radius_upper-2*contact_arc_length_upper
 LSEL,R,LOC,Y,0,2*crack_angle_upper
 LCCAT,ALL
@@ -92,118 +179,64 @@ LCCAT,ALL
 ! Select everything
 ALLSEL,ALL
 
-/COM,---------------------------------------------------------------------------
-/COM,LOWER BALL
-/COM,---------------------------------------------------------------------------
-
-CSYS,30
-K,311,ball_radius_lower,0
-K,312,ball_radius_lower,crack_angle_lower
-K,342,ball_radius_lower,crack_angle_lower
-K,313,ball_radius_lower,crack_angle_lower*2
-K,314,ball_radius_lower-contact_arc_length_lower,0
-K,315,ball_radius_lower-contact_arc_length_lower,crack_angle_lower
-K,316,ball_radius_lower-contact_arc_length_lower,crack_angle_lower*2
-K,317,ball_radius_lower-contact_arc_length_lower*2,
-K,318,ball_radius_lower-contact_arc_length_lower*2,crack_angle_lower
-K,319,ball_radius_lower-contact_arc_length_lower*2,crack_angle_lower*2
-CSYS,31
-K,321,ball_radius_lower/2,0
-K,322,ball_radius_lower/2,intersection_angle_small/2
-K,323,ball_radius_lower/2,intersection_angle_small
-CSYS,30
-K,331,0,90
-K,332,ball_radius_lower/2,90
-K,333,ball_radius_lower,90
-
-! Near areas
-CSYS,30
-A,311,312,315,314
-*IF,simulate_cracks,EQ,true,THEN
-A,342,313,316,315
-*ELSE
-A,312,313,316,315
 *ENDIF
-A,315,316,319,318
-A,314,315,318,317
-
-! Intermediate areas
-CSYS,0
-L,319,322
-CSYS,30
-L,313,323
-L,317,321
-CSYS,31
-L,321,322
-L,322,323
-CSYS,30
-A,313,323,322,319,316
-A,317,318,319,322,321
-
-! Distant areas
-CSYS,31
-BSPLIN,322,332,,,,,1,intersection_angle_small/2+180,,1,0
-CSYS,30
-L,323,333
-L,321,331
-A,323,333,332,322
-A,321,322,332,331
-
-! Concatenation for meshing
-CSYS,30
-LSEL,S,LOC,X,ball_radius_lower-2*contact_arc_length_lower,ball_radius_lower-2*contact_arc_length_lower
-LSEL,R,LOC,Y,0,2*crack_angle_lower
-LCCAT,ALL
-LSEL,S,LOC,X,ball_radius_lower-contact_arc_length_lower*2,ball_radius_lower
-LSEL,R,LOC,Y,2*crack_angle_lower,2*crack_angle_lower
-LCCAT,ALL
-
-! Select everything
-ALLSEL,ALL
 
 /COM,---------------------------------------------------------------------------
 /COM,COMPONENTS
 /COM,---------------------------------------------------------------------------
 
-KSEL,S,KP,,211
-KSEL,A,KP,,212
-KSEL,A,KP,,242
-KSEL,A,KP,,213
-LSLK,S,1
-CM,contact_area_upper,LINE
-
+! Lines on the contact surface
 KSEL,S,KP,,311
 KSEL,A,KP,,312
 KSEL,A,KP,,342
 KSEL,A,KP,,313
 LSLK,S,1
-CM,contact_area_lower,LINE
+CM,line_contact_lower,LINE
 
-KSEL,S,KP,,215
-KSEL,A,KP,,212
-LSLK,S,1
-CM,crack_face_upper_inner,LINE
-
-KSEL,S,KP,,215
-KSEL,A,KP,,242
-LSLK,S,1
-CM,crack_face_upper_outer,LINE
-
+! Lines on the inner crack face
 KSEL,S,KP,,315
 KSEL,A,KP,,312
 LSLK,S,1
-CM,crack_face_lower_inner,LINE
+CM,line_crack_lower_inner,LINE
 
+! Lines on the outer crack face
 KSEL,S,KP,,315
 KSEL,A,KP,,342
 LSLK,S,1
-CM,crack_face_lower_outer,LINE
+CM,line_crack_lower_outer,LINE
 
-ASEL,S,AREA,,1,8,+1,1
-CM,ball_upper,AREA
-
+! Areas of the ball
 ASEL,S,AREA,,9,16,+1,1
-CM,ball_lower,AREA
+CM,area_ball_lower,AREA
+
+! Repeat for the upper ball
+*IF,simulate_two_balls,EQ,true,THEN
+
+	! Lines on the contact surface
+	KSEL,S,KP,,211
+	KSEL,A,KP,,212
+	KSEL,A,KP,,242
+	KSEL,A,KP,,213
+	LSLK,S,1
+	CM,line_contact_upper,LINE
+
+	! Lines on the inner crack face
+	KSEL,S,KP,,215
+	KSEL,A,KP,,212
+	LSLK,S,1
+	CM,line_crack_upper_inner,LINE
+
+	! Lines on the outer crack face
+	KSEL,S,KP,,215
+	KSEL,A,KP,,242
+	LSLK,S,1
+	CM,line_crack_upper_outer,LINE
+
+	! Areas of the ball
+	ASEL,S,AREA,,1,8,+1,1
+	CM,area_ball_upper,AREA
+
+*ENDIF
 
 ! Select everything
 ALLSEL,ALL
@@ -212,10 +245,14 @@ ALLSEL,ALL
 /COM,RIGID LINE
 /COM,---------------------------------------------------------------------------
 
+*IF,simulate_two_balls,EQ,false,THEN
+
 ! Rigid line
 CSYS,0
 K,98,0,0
-K,99,1.5*contact_radius,0
+K,99,1.5*contact_radius_hertz,0
 
 ! Orientation decides contact normals
 L,99,98
+
+*ENDIF

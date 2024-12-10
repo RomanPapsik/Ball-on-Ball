@@ -19,13 +19,14 @@
 /INPUT,BoB-5-geometry,inp
 
 ! Mesh
-/INPUT,BoB-6-mesh,inp
+/INPUT,BoB-6-mesh-1-structural,inp
+/INPUT,BoB-6-mesh-2-contact,inp
 
-! Boundary conditions
-/INPUT,BoB-7-BCs,inp
+! ! Boundary conditions
+! /INPUT,BoB-7-BCs,inp
 
-! Stress
-/INPUT,BoB-8-stress,inp
+! ! Stress
+! /INPUT,BoB-8-stress,inp
 
-! Energy
-/INPUT,BoB-9-energy,inp
+! ! Energy
+! /INPUT,BoB-9-energy,inp

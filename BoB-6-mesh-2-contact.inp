@@ -1,0 +1,228 @@
+/COM,===========================================================================
+/COM,MESH
+/COM,===========================================================================
+
+/PREP7
+
+/COM,---------------------------------------------------------------------------
+/COM,CONTACT ELEMENTS FOR BALLS
+/COM,---------------------------------------------------------------------------
+
+! 2D Target Segment
+*SET,element_target_ball,169
+ET,169,TARGE169
+
+! Rigid line case
+*IF,simulate_two_balls,EQ,false,THEN
+
+	! Boundary conditions
+	KEYOPT,169,2,0 ! (Automatic constrain)
+
+*ENDIF
+
+! 2D 3-Node Surface-to-Surface Contact 
+*SET,element_contact_ball,172
+ET,172,CONTA172
+! Contact algorithm
+! KEYOPT,172,2,0 ! (Augmented Lagrange)
+KEYOPT,172,2,4 ! (Pure Lagrange)
+! Contact detection
+! KEYOPT,172,4,0 ! (At Gauss points)
+KEYOPT,172,4,2 ! (normal to target)
+! Automated adjustment
+KEYOPT,172,5,1 ! (Auto ICONT)
+! Ininital gap condideration
+KEYOPT,172,9,1 ! (Excluding)
+
+/COM,---------------------------------------------------------------------------
+/COM,CONTACT ELEMENTS FOR CRACKS
+/COM,---------------------------------------------------------------------------
+
+*IF,simulate_cracks,EQ,true,THEN
+
+	! 2D Target Segment
+	*SET,element_target_crack,168
+	ET,168,TARGE169
+
+	! 2D 3-Node Surface-to-Surface Contact
+	*SET,element_contact_crack,173
+	ET,173,CONTA172
+	! Contact algorithm
+	! KEYOPT,173,2,0 ! (Augmented Lagrange)
+	KEYOPT,173,2,4 ! (Pure Lagrange)
+	! Contact detection
+	! KEYOPT,173,4,0 ! (At Gauss points)
+	KEYOPT,173,4,2 ! (normal to target)
+	! Automated adjustment
+	KEYOPT,173,5,0 ! (No adjustment)
+	! Ininital gap condideration
+	KEYOPT,173,9,1 ! (Excluding)
+
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,BALL TO BALL CONTACT
+/COM,---------------------------------------------------------------------------
+
+! One ball against rigid line
+*IF,simulate_two_balls,EQ,false,THEN
+
+	! Contact pair real set number
+	*SET,pair_ball_line,11
+
+	! Select nodes on lower ball
+	CMSEL,S,line_contact_lower
+	NSLL,S,1
+	! Target elements
+	TYPE,172
+	REAL,pair_ball_line
+	ESURF
+
+	! Rigid line
+	KSEL,S,KP,,98,99
+	LSLK,S,1
+	LESIZE,ALL,,,20,,1
+	TYPE,169
+	REAL,pair_ball_line
+	LMESH,ALL
+	LSEL,ALL
+
+	! Target circle radius
+	RMODIF,pair_ball_line,1,0
+	! Initial closure (ICONT)
+	RMODIF,pair_ball_line,5,contact_sagitta_lower
+	! Pinball region (PINB)
+	RMODIF,pair_ball_line,6,-contact_sagitta_lower*1.5
+
+! Two balls against each other
+*ELSE
+
+	! Contact pair real set number
+	*SET,pair_balls_1,11
+	*SET,pair_balls_2,12
+
+	! Select nodes on upper ball
+	CMSEL,S,contact_area_upper
+	NSLL,S,1
+	! Target elements
+	TYPE,169
+	REAL,pair_balls_1
+	ESURF
+	! Contact elements
+	TYPE,172
+	REAL,pair_balls_2
+	ESURF
+
+	! Select nodes in contact
+	CMSEL,S,contact_area_lower
+	NSLL,S,1
+	! Target elements
+	TYPE,169
+	REAL,pair_balls_2
+	ESURF
+	! Contact elements
+	TYPE,172
+	REAL,pair_balls_1
+	ESURF
+
+	! Select everything
+	ALLSEL,ALL
+
+	! Target circle radius
+	RMODIF,pair_balls_1,1,ball_radius_upper
+	RMODIF,pair_balls_2,1,ball_radius_lower
+	! Initial closure (ICONT)
+	RMODIF,pair_balls_1,5,contact_sagitta_lower+contact_sagitta_upper+initial_gap/2
+	RMODIF,pair_balls_2,5,contact_sagitta_lower+contact_sagitta_upper+initial_gap/2
+	! Pinball region (PINB)
+	RMODIF,pair_balls_1,6,-(contact_sagitta_lower+contact_sagitta_upper)*1.2
+	RMODIF,pair_balls_2,6,-(contact_sagitta_lower+contact_sagitta_upper)*1.2
+
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,CRACK FACES CONTACT
+/COM,---------------------------------------------------------------------------
+
+*IF,simulate_cracks,EQ,true,THEN
+
+	! Contact pair real set number
+	*SET,pair_upper_crack_1,21
+	*SET,pair_upper_crack_2,22
+
+	! Select nodes on inner face
+	CMSEL,S,crack_face_upper_inner
+	NSLL,S,1
+	! Target elements
+	TYPE,168
+	REAL,pair_upper_crack_1
+	ESURF
+	! Contact elements
+	TYPE,173
+	REAL,pair_upper_crack_2
+	ESURF
+
+	! Select nodes on outer face
+	CMSEL,S,crack_face_upper_outer
+	NSLL,S,1
+	! Target elements
+	TYPE,168
+	REAL,pair_upper_crack_2
+	ESURF
+	! Contact elements
+	TYPE,173
+	REAL,pair_upper_crack_1
+	ESURF
+
+	! Select everything
+	ALLSEL,ALL
+
+	! Target circle radius
+	RMODIF,pair_upper_crack_1,1,0
+	RMODIF,pair_upper_crack_2,1,0
+	! Pinball region (PINB)
+	RMODIF,pair_upper_crack_1,6,-micrometer
+	RMODIF,pair_upper_crack_2,6,-micrometer
+
+	*IF,simulate_two_balls,EQ,true,THEN
+
+		! Contact pair real set number
+		*SET,pair_lower_crack_1,31
+		*SET,pair_lower_crack_2,32
+
+		! Select nodes on inner face
+		CMSEL,S,crack_face_lower_inner
+		NSLL,S,1
+		! Target elements
+		TYPE,168
+		REAL,pair_lower_crack_1
+		ESURF
+		! Contact elements
+		TYPE,173
+		REAL,pair_lower_crack_2
+		ESURF
+
+		! Select nodes on outer face
+		CMSEL,S,crack_face_lower_outer
+		NSLL,S,1
+		TYPE,168
+		REAL,pair_lower_crack_2
+		ESURF
+		! Contact elements
+		TYPE,173
+		REAL,pair_lower_crack_1
+		ESURF
+
+		! Select everything
+		ALLSEL,ALL
+
+		! Target circle radius
+		RMODIF,pair_lower_crack_1,1,0
+		RMODIF,pair_lower_crack_2,1,0
+		! Pinball region (PINB)
+		RMODIF,pair_lower_crack_1,6,-micrometer
+		RMODIF,pair_lower_crack_2,6,-micrometer
+
+	*ENDIF
+
+*ENDIF
