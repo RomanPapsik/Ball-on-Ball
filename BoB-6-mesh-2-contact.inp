@@ -10,53 +10,46 @@
 
 ! 2D Target Segment
 *SET,element_target_ball,169
-ET,169,TARGE169
-
-! Rigid line case
-*IF,simulate_two_balls,EQ,false,THEN
-
-	! Boundary conditions
-	KEYOPT,169,2,0 ! (Automatic constrain)
-
-*ENDIF
+ET,element_target_ball,TARGE169
 
 ! 2D 3-Node Surface-to-Surface Contact 
 *SET,element_contact_ball,172
-ET,172,CONTA172
+ET,element_contact_ball,CONTA172
 ! Contact algorithm
-! KEYOPT,172,2,0 ! (Augmented Lagrange)
-KEYOPT,172,2,4 ! (Pure Lagrange)
+! KEYOPT,element_contact_ball,2,0 ! (Augmented Lagrange)
+KEYOPT,element_contact_ball,2,4 ! (Pure Lagrange)
 ! Contact detection
-! KEYOPT,172,4,0 ! (At Gauss points)
-KEYOPT,172,4,2 ! (normal to target)
+! KEYOPT,element_contact_ball,4,0 ! (At Gauss points)
+KEYOPT,element_contact_ball,4,2 ! (normal to target)
 ! Automated adjustment
-KEYOPT,172,5,1 ! (Auto ICONT)
+KEYOPT,element_contact_ball,5,1 ! (Auto ICONT)
 ! Ininital gap condideration
-KEYOPT,172,9,1 ! (Excluding)
+KEYOPT,element_contact_ball,9,1 ! (Excluding)
 
 /COM,---------------------------------------------------------------------------
 /COM,CONTACT ELEMENTS FOR CRACKS
 /COM,---------------------------------------------------------------------------
 
+! Prevent overlap of crack faces
 *IF,simulate_cracks,EQ,true,THEN
 
 	! 2D Target Segment
 	*SET,element_target_crack,168
-	ET,168,TARGE169
+	ET,element_target_crack,TARGE169
 
 	! 2D 3-Node Surface-to-Surface Contact
 	*SET,element_contact_crack,173
-	ET,173,CONTA172
+	ET,element_contact_crack,CONTA172
 	! Contact algorithm
-	! KEYOPT,173,2,0 ! (Augmented Lagrange)
-	KEYOPT,173,2,4 ! (Pure Lagrange)
+	! KEYOPT,element_contact_crack,2,0 ! (Augmented Lagrange)
+	KEYOPT,element_contact_crack,2,4 ! (Pure Lagrange)
 	! Contact detection
-	! KEYOPT,173,4,0 ! (At Gauss points)
-	KEYOPT,173,4,2 ! (normal to target)
+	! KEYOPT,element_contact_crack,4,0 ! (At Gauss points)
+	KEYOPT,element_contact_crack,4,2 ! (normal to target)
 	! Automated adjustment
-	KEYOPT,173,5,0 ! (No adjustment)
+	KEYOPT,element_contact_crack,5,0 ! (No adjustment)
 	! Ininital gap condideration
-	KEYOPT,173,9,1 ! (Excluding)
+	KEYOPT,element_contact_crack,9,1 ! (Excluding)
 
 *ENDIF
 
@@ -67,6 +60,8 @@ KEYOPT,172,9,1 ! (Excluding)
 ! One ball against rigid line
 *IF,simulate_two_balls,EQ,false,THEN
 
+	! Boundary conditions
+	KEYOPT,element_target_ball,2,0 ! (Automatic constrain)
 	! Contact pair real set number
 	*SET,pair_ball_line,11
 
@@ -74,7 +69,7 @@ KEYOPT,172,9,1 ! (Excluding)
 	CMSEL,S,line_contact_lower
 	NSLL,S,1
 	! Target elements
-	TYPE,172
+	TYPE,element_target_ball
 	REAL,pair_ball_line
 	ESURF
 

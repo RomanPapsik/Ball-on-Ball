@@ -2,17 +2,19 @@
 /COM,CRACKED STATE
 /COM,===========================================================================
 
-FINISH
+! Skip this the end if fracture should not be simulated
+*IF,simulate_cracks,EQ,false,:skip
 
-*IF,simulate_cracks,EQ,true,THEN
-
-/COM,---------------------------------------------------------------------------
-/COM,LOOPS INITIATION
-/COM,---------------------------------------------------------------------------
+! Optional replacement of the force by displacement
+*SET,replace_force_with_displacement,false
 
 ! Crack increment length
 *SET,crack_increment,1*micrometer!element_size_upper/(3**4)
 *SET,crack_length_limit,15*micrometer
+
+/COM,---------------------------------------------------------------------------
+/COM,LOOPS INITIATION
+/COM,---------------------------------------------------------------------------
 
 ! Number of loops
 *SET,loops_count,NINT(crack_length_limit/crack_increment)+1
@@ -289,4 +291,4 @@ CSYS,20
 *ENDDO
 *ENDDO
 
-*ENDIF
+:skip

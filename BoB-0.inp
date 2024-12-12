@@ -22,11 +22,14 @@
 /INPUT,BoB-6-mesh-1-structural,inp
 /INPUT,BoB-6-mesh-2-contact,inp
 
-! ! Boundary conditions
-! /INPUT,BoB-7-BCs,inp
+! Boundary conditions
+/INPUT,BoB-7-BCs,inp
 
-! ! Stress
-! /INPUT,BoB-8-stress,inp
+! Stress in crackless state
+/INPUT,BoB-8-crackless,inp
 
-! ! Energy
-! /INPUT,BoB-9-energy,inp
+! Energy evolution with crack growth
+/INPUT,BoB-9-cracked,inp
+
+! Export of results
+/INPUT,BoB-8-stress-export,inp

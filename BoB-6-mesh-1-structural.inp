@@ -25,7 +25,9 @@ LESIZE,ALL,,,20,,1
 
 ! Vicinity of contact
 ASEL,S,AREA,,1,4
-ASEL,A,AREA,,9,12
+*IF,simulate_two_balls,EQ,true,THEN
+	ASEL,A,AREA,,9,12
+*ENDIF
 LSLA,S
 LESIZE,ALL,,,10,,1
 ALLSEL,ALL
@@ -49,11 +51,11 @@ AMESH,7,8
 
 *IF,simulate_two_balls,EQ,true,THEN
 
-! Lower ball
-MAT,material_upper
-AMESH,9,12
-AMESH,13,14
-AMESH,15,16
+	! Lower ball
+	MAT,material_upper
+	AMESH,9,12
+	AMESH,13,14
+	AMESH,15,16
 
 *ENDIF
 
@@ -70,14 +72,12 @@ ESEL,R,CENT,Y,crack_angle_lower*0.4,crack_angle_lower*1.7
 EREFINE,ALL,,,3,0,OFF,ON
 
 *IF,simulate_two_balls,EQ,true,THEN
-
-CMSEL,S,area_ball_upper
-ESLA,S
-CSYS,cs_ball_upper
-ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.5,ball_radius_upper
-ESEL,R,CENT,Y,crack_angle_upper*0.4,crack_angle_upper*1.7
-EREFINE,ALL,,,3,0,OFF,ON
-
+	CMSEL,S,area_ball_upper
+	ESLA,S
+	CSYS,cs_ball_upper
+	ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.5,ball_radius_upper
+	ESEL,R,CENT,Y,crack_angle_upper*0.4,crack_angle_upper*1.7
+	EREFINE,ALL,,,3,0,OFF,ON
 *ENDIF
 
 ! Second refinement
@@ -160,24 +160,28 @@ EREFINE,ALL,,,3,0,OFF,ON
 
 *ENDIF
 
-! Sixth refinement
-CMSEL,S,line_crack_lower_inner
-CMSEL,A,line_crack_lower_outer
-NSLL,S,1
-ESLN,S,0,ALL
-CSYS,cs_ball_lower
-ESEL,R,CENT,X,ball_radius_lower-10*micrometer,ball_radius_lower
-EREFINE,ALL,,,3,2,OFF,ON
+*IF,simulate_cracks,EQ,true,THEN
 
-*IF,simulate_two_balls,EQ,true,THEN
+	! Sixth refinement
+	CMSEL,S,line_crack_lower_inner
+	CMSEL,A,line_crack_lower_outer
+	NSLL,S,1
+	ESLN,S,0,ALL
+	CSYS,cs_ball_lower
+	ESEL,R,CENT,X,ball_radius_lower-10*micrometer,ball_radius_lower
+	EREFINE,ALL,,,3,2,OFF,ON
 
-CMSEL,S,line_crack_upper_inner
-CMSEL,A,line_crack_upper_outer
-NSLL,S,1
-ESLN,S,0,ALL
-CSYS,cs_ball_upper
-ESEL,R,CENT,X,ball_radius_upper-10*micrometer,ball_radius_upper
-EREFINE,ALL,,,3,2,OFF,ON
+	*IF,simulate_two_balls,EQ,true,THEN
+
+		CMSEL,S,line_crack_upper_inner
+		CMSEL,A,line_crack_upper_outer
+		NSLL,S,1
+		ESLN,S,0,ALL
+		CSYS,cs_ball_upper
+		ESEL,R,CENT,X,ball_radius_upper-10*micrometer,ball_radius_upper
+		EREFINE,ALL,,,3,2,OFF,ON
+
+*ENDIF
 
 *ENDIF
 
@@ -197,7 +201,11 @@ ALLSEL,ALL
 *SET,stitching_precision_upper,resized_element_size_upper/3
 
 ! Tolerance for selections
-SELTOL,MIN(stitching_precision_lower,stitching_precision_upper)
+*IF,simulate_two_balls,EQ,false,THEN
+	SELTOL,stitching_precision_lower
+*ELSE
+	SELTOL,MIN(stitching_precision_lower,stitching_precision_upper)
+*ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,STATISTICS

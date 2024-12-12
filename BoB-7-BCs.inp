@@ -4,27 +4,46 @@
 
 /PREP7
 
-! Upper ball coupling
-CSYS,20
+! Lower ball coupling
+CSYS,cs_ball_lower
 NSEL,S,LOC,Y,90,90
 NSEL,A,LOC,X,0,0
-CP,1,UY,ALL
+CP,NEXT,UY,ALL
 NSEL,ALL
 
-! Lower ball support
+! Upper ball coupling
 *IF,simulate_two_balls,EQ,true,THEN
-	CSYS,30
+	CSYS,cs_ball_upper
 	NSEL,S,LOC,Y,90,90
 	NSEL,A,LOC,X,0,0
+	CP,NEXT,UY,ALL
+	NSEL,ALL
+*ENDIF
+
+! Displacement
+*IF,initial_gap,LE,0,THEN
+	CSYS,0
+	ESEL,S,TYPE,,element_structural
+	NSLE,S
+	NSEL,R,LOC,X,0,0
+	NSEL,R,LOC,Y,-initial_gap/2,+initial_gap/2
 	D,ALL,UY,0
 	ALLSEL,ALL
 *ENDIF
 
-! Force
-CSYS,20
-*SET,loaded_node,NODE(0,0,0)
+! Lower force
+CSYS,cs_ball_lower
+*SET,loaded_node_lower,NODE(0,0,0)
 CSYS,0
-F,loaded_node,FY,-force
+F,loaded_node_lower,FY,force
+
+! Upper force
+*IF,simulate_two_balls,EQ,true,THEN
+	CSYS,cs_ball_upper
+	*SET,loaded_node_upper,NODE(0,0,0)
+	CSYS,0
+	F,loaded_node_upper,FY,-force ! TODO orientation
+*ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,SAVE CRACKED MODEL

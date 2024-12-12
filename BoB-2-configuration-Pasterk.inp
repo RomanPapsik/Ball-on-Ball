@@ -2,7 +2,7 @@
 /COM,CONFIGURATION
 /COM,===========================================================================
 
-/PREP7
+/PREP7cs
 
 /COM,---------------------------------------------------------------------------
 /COM,SWITCHES
@@ -34,17 +34,17 @@
 
 ! Young's modulus
 *SET,young_modulus_lower,304*gigapascal
-*SET,young_modulus_upper,young_modulus_lower
+*SET,young_modulus_upper,304*gigapascal
 
 ! Poisson's ratio
 *SET,poisson_ratio_lower,0.268
-*SET,poisson_ratio_upper,poisson_ratio_lower
+*SET,poisson_ratio_upper,0.268
 
 /COM,---------------------------------------------------------------------------
 /COM,FORCE MAGNITUDE
 /COM,---------------------------------------------------------------------------
 
-*IF,Fc,LE,0,THEN
+*IF,Fc,LE,1E-18,THEN
 	! Take default value
 	*SET,force,5874*newton
 *ELSE
@@ -56,7 +56,7 @@
 /COM,BALL RADII
 /COM,---------------------------------------------------------------------------
 
-*IF,RbL,LE,0,THEN
+*IF,RbL,LE,1E-18,THEN
 	! Take default value
 	*SET,ball_radius_lower,7.935/2*millimeter
 *ELSE
@@ -64,7 +64,7 @@
 	*SET,ball_radius_lower,RbL*millimeter
 *ENDIF
 
-*IF,RbU,LE,0,THEN
+*IF,RbU,LE,1E-18,THEN
 	! Take default value
 	*SET,ball_radius_upper,ball_radius_lower
 *ELSE
@@ -78,18 +78,18 @@
 
 *IF,simulate_cracks,EQ,true,THEN
 	! Crack radius
-	*IF,RaL,LE,0,AND,RaRcL,LE,0,THEN
+	*IF,RaL,LE,1E-18,AND,RaRcL,LE,1E-18,THEN
 		! Take default value
 		*SET,crack_multiplier_lower,1.1
 	*ENDIF
 
-	*IF,RaL,LE,0,AND,RaRcL,LE,0,THEN
+	*IF,RaU,LE,1E-18,AND,RaRcU,LE,1E-18,THEN
 		! Take default value
 		*SET,crack_multiplier_upper,crack_multiplier_lower
 	*ENDIF
 *ELSE
-	*SET,crack_multiplier_lower,1
-	*SET,crack_multiplier_lower,1
+	*SET,crack_multiplier_lower,1.0
+	*SET,crack_multiplier_upper,1.0
 *ENDIF
 
 ! Crack angle declination from the surface

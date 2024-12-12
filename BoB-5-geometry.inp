@@ -5,7 +5,7 @@
 /PREP7
 
 ! Initial gap between balls
-*SET,initial_gap,1*millimeter
+*SET,initial_gap,0*millimeter
 
 /COM,---------------------------------------------------------------------------
 /COM,AUXILIARY COORDINATE SYSTEMS
@@ -185,56 +185,66 @@ ALLSEL,ALL
 /COM,COMPONENTS
 /COM,---------------------------------------------------------------------------
 
-! Lines on the contact surface
-KSEL,S,KP,,311
-KSEL,A,KP,,312
-KSEL,A,KP,,342
-KSEL,A,KP,,313
-LSLK,S,1
-CM,line_contact_lower,LINE
-
-! Lines on the inner crack face
-KSEL,S,KP,,315
-KSEL,A,KP,,312
-LSLK,S,1
-CM,line_crack_lower_inner,LINE
-
-! Lines on the outer crack face
-KSEL,S,KP,,315
-KSEL,A,KP,,342
-LSLK,S,1
-CM,line_crack_lower_outer,LINE
-
 ! Areas of the ball
-ASEL,S,AREA,,9,16,+1,1
+ASEL,S,AREA,,1,8,+1,1
 CM,area_ball_lower,AREA
+
+! Lines on the contact surface
+	KSEL,S,KP,,101
+	KSEL,A,KP,,111
+	KSEL,A,KP,,112
+	KSEL,A,KP,,113
+	LSLK,S,1
+	CM,line_contact_lower,LINE
 
 ! Repeat for the upper ball
 *IF,simulate_two_balls,EQ,true,THEN
 
+	! Areas of the ball
+	/com,kurwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+	ASEL,S,AREA,,9,16,+1,1
+	CM,area_ball_upper,AREA
+
 	! Lines on the contact surface
-	KSEL,S,KP,,211
-	KSEL,A,KP,,212
-	KSEL,A,KP,,242
-	KSEL,A,KP,,213
+	KSEL,S,KP,,311
+	KSEL,A,KP,,312
+	KSEL,A,KP,,342
+	KSEL,A,KP,,313
 	LSLK,S,1
 	CM,line_contact_upper,LINE
+
+*ENDIF
+
+*IF,simulate_cracks,EQ,true,THEN
 
 	! Lines on the inner crack face
 	KSEL,S,KP,,215
 	KSEL,A,KP,,212
 	LSLK,S,1
-	CM,line_crack_upper_inner,LINE
+	CM,line_crack_lower_inner,LINE
 
 	! Lines on the outer crack face
 	KSEL,S,KP,,215
 	KSEL,A,KP,,242
 	LSLK,S,1
-	CM,line_crack_upper_outer,LINE
+	CM,line_crack_lower_outer,LINE
 
-	! Areas of the ball
-	ASEL,S,AREA,,1,8,+1,1
-	CM,area_ball_upper,AREA
+*ENDIF
+
+! Repeat for the upper ball
+*IF,simulate_cracks,EQ,true,AND,simulate_two_balls,EQ,true,THEN
+
+	! Lines on the inner crack face
+	KSEL,S,KP,,315
+	KSEL,A,KP,,312
+	LSLK,S,1
+	CM,line_crack_upper_inner,LINE
+
+	! Lines on the outer crack face
+	KSEL,S,KP,,315
+	KSEL,A,KP,,342
+	LSLK,S,1
+	CM,line_crack_upper_outer,LINE
 
 *ENDIF
 
@@ -247,12 +257,12 @@ ALLSEL,ALL
 
 *IF,simulate_two_balls,EQ,false,THEN
 
-! Rigid line
-CSYS,0
-K,98,0,0
-K,99,1.5*contact_radius_hertz,0
+	! Rigid line
+	CSYS,0
+	K,98,0,0
+	K,99,1.5*contact_radius_hertz,0
 
-! Orientation decides contact normals
-L,99,98
+	! Orientation decides contact normals
+	L,98,99
 
 *ENDIF

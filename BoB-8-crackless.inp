@@ -25,11 +25,10 @@
 ALLSEL,ALL
 
 /COM,---------------------------------------------------------------------------
-/COM,SOLVER
+/COM,SOLUTION
 /COM,---------------------------------------------------------------------------
 
 /SOLU
-CSYS,1
 
 ! New analysis
 ANTYPE,STATIC,NEW
@@ -52,15 +51,13 @@ DSPOPTION,,INCORE
 	NLGEOM,OFF
 *ENDIF
 
-! Solve
+! Select everything
 ALLSEL,ALL
+
+! Solve
 /UIS,MSGPOP,3
 SOLVE
 /UIS,MSGPOP,0
-
-/POST1
-RSYS,1
-/DSCALE,ALL,1
 
 /COM,---------------------------------------------------------------------------
 /COM,DISPLACEMENT
@@ -68,8 +65,14 @@ RSYS,1
 
 /POST1
 
-CSYS,20
-*SET,downward_displacement_crackless,ABS(UX(loaded_node))
+! Displacement towards the contact point
+RSYS,cs_ball_lower
+*GET,displacement_crackless_lower,NODE,loaded_node_lower,U,X
+
+*IF,simulate_two_balls,EQ,true,THEN
+	RSYS,cs_ball_upper
+	*GET,displacement_crackless_upper,NODE,loaded_node_upper,U,X
+*ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,STRAIN ENERGY
@@ -77,41 +80,27 @@ CSYS,20
 
 /POST1
 
-! Select everything
-CMSEL,S,ball_upper
-ESLA,S
-ESEL,R,TYPE,,183
-CSYS,1
-RSYS,1
-! Erase element table
-ETABLE,ERAS
-! Fill element table with strain energy
-ETABLE,energ,SENE
+! Select elements of the ball
+CMSEL,S,area_ball_lower,AREA
+ESLA,S $ ESEL,R,TYPE,,element_structural
+! Erase element table and fill it with the strain energy
+ETABLE,ERAS $ ETABLE,energy,SENE
 ! Sum all element table variables
 SSUM
 ! Set sum of strain energy over all elements
-*GET,energy_crackless_upper,SSUM,0,ITEM,energ
+*GET,energy_crackless_lower,SSUM,0,ITEM,energy
 
 *IF,simulate_two_balls,EQ,true,THEN
 
-	! Select everything
-	CMSEL,S,ball_lower
-	ESLA,S
-	ESEL,R,TYPE,,183
-	CSYS,1
-	RSYS,1
-	! Erase element table
-	ETABLE,ERAS
-	! Fill element table with strain energy
-	ETABLE,energ,SENE
+	! Select elements of the ball
+	CMSEL,S,area_ball_upper,AREA
+	ESLA,S $ ESEL,R,TYPE,,element_structural
+	! Erase element table and fill it with the strain energy
+	ETABLE,ERAS $ ETABLE,energy,SENE
 	! Sum all element table variables
 	SSUM
 	! Set sum of strain energy over all elements
-	*GET,energy_crackless_lower,SSUM,0,ITEM,energ
-
-	! Select everything
-	ALLSEL,ALL
-
+	*GET,energy_crackless_upper,SSUM,0,ITEM,energy
 *ELSE
 	*SET,energy_crackless_lower,0
 *ENDIF
@@ -123,15 +112,15 @@ SSUM
 /COM,---------------------------------------------------------------------------
 
 /POST1
-CSYS,20
-RSYS,20
 
 ! Select surface nodes
+CSYS,cs_ball_lower
 NSEL,S,LOC,X,0,ball_radius_upper
 NSEL,R,LOC,Y,0,2*contact_angle_upper
-! Sort selected nodes by normal stress
+! Sort selected nodes by tangential stress
+RSYS,cs_ball_lower
 NSORT,S,Y
-! Get maximal and minimal normal stress
+! Get maximal and minimal tangential stress
 *GET,minimal_stress,SORT,,MIN
 *GET,maximal_stress,SORT,,MAX
 ! Get numbers of nodes an maximal and minimal stress locations
@@ -141,56 +130,60 @@ NSORT,S,Y
 NSEL,ALL
 ! Change range of plotted values
 *SET,absolute_maximum,MAX(ABS(minimal_stress),ABS(maximal_stress))
-! /CONTOUR,1,101,-absolute_maximum,,+absolute_maximum
-/CONTOUR,ALL,40,-maximum_stress,,maximum_stress
-! Plot normal stress
+/CONTOUR,ALL,10,-absolute_maximum,,absolute_maximum
+! Plot stress field
 PLESOL,S,Y
 
 /COM,---------------------------------------------------------------------------
-/COM,STRESS AT SURFACE
+/COM,PATH ON SURFACE
 /COM,---------------------------------------------------------------------------
 
 /POST1
-CSYS,20
-RSYS,20
 
-! Define new path
-ESEL,S,TYPE,,183
-NSLE,S,1
-*SET,segments_count,NINT((contact_arc_length_upper)/(micrometer/10))
-PATH,path_on_surface,2,10,segments_count
-PPATH,1,node(ball_radius_upper,0,0)
-PPATH,2,node(ball_radius_upper,contact_angle_upper*2,0)
+! Select structural elements of the ball
+ESEL,S,TYPE,,element_structural $ NSLE,S,1
+! Calculate path division
+*SET,path_division,NINT((contact_arc_length_lower)/(micrometer/4))
+! Initialize new path
+PATH,path_on_surface,2,10,path_division
+! Define path
+CSYS,cs_ball_lower
+PPATH,1,node(ball_radius_lower,0,0),,,,cs_ball_lower
+PPATH,2,node(ball_radius_lower,contact_angle_lower*4,0),,,,cs_ball_lower
 
 ! Map onto path
-PDEF,Srad,S,X
-PDEF,Sthe,S,Y
-PDEF,Sphi,S,Z
-PDEF,Sfir,S,1
-PDEF,Ssec,S,2
-PDEF,Sthi,S,3
+RSYS,cs_ball_lower
+PDEF,Snorm,S,X
+PDEF,Stang,S,Y
+PDEF,Shoop,S,Z
+PDEF,S1,S,1
+PDEF,S2,S,2
+PDEF,S3,S,3
 
 ! Plot paths
-/AXLAB,X,Location [um]
-/AXLAB,Y,Stress [MPa]
+/TITLE,Path on the lower ball surface
+/AXLAB,X,Path position [um]
+/AXLAB,Y,Stress components [MPa]
 ! /XRANGE,contact_radius*0.95,2*contact_radius*1.05
 ! /YRANGE,-stress_maximum*2,+stress_maximum*2
-PLPATH,Srad,Sthe,Sphi
-
+PLPATH,Stang,Snorm,Shoop
+PLGEOM,Stang,Snorm,Shoop
 ! Save current path into an array
 PAGET,path_on_surface,TABLE
 ALLSEL,ALL
 
 /COM,---------------------------------------------------------------------------
-/COM,STRESS IN DEPTH
+/COM,STRESS PATH IN DEPTH
 /COM,---------------------------------------------------------------------------
 
+*IF,simulate_cracks,EQ,true,THEN
+
 /POST1
-CSYS,20
-RSYS,20
+CSYS,cs_ball_lower
+RSYS,cs_ball_lower
 
 ! Define new path
-ESEL,S,TYPE,,183
+ESEL,S,TYPE,,element_structural
 NSLE,S,1
 *SET,path_length,ball_radius_upper*0.05
 *SET,path_segments,NINT(path_length/(micrometer/10))
@@ -217,8 +210,4 @@ PLPATH,Srad,Sthe,Sphi
 PAGET,path_in_depth,TABLE
 ALLSEL,ALL
 
-/COM,---------------------------------------------------------------------------
-/COM,EXPORT
-/COM,---------------------------------------------------------------------------
-
-/INPUT,ball-on-ball-08-stress-export,inp
+*ENDIF
