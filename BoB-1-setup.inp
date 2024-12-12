@@ -80,6 +80,23 @@ SELTOL,micrometer/1000
 /CMAP,'blue-gray-red','cmap'
 
 /COM,---------------------------------------------------------------------------
+/COM,COMMAND LINE VARIABLES
+/COM,---------------------------------------------------------------------------
+
+! Possible status of a variable
+*SET,defined,0
+*SET,undefined,-1
+
+! Check command line
+*GET,status_Fc,PARM,Fc,TYPE
+*GET,status_RbL,PARM,RbL,TYPE
+*GET,status_RbU,PARM,RbU,TYPE
+*GET,status_RaL,PARM,RaL,TYPE
+*GET,status_RaU,PARM,RaU,TYPE
+*GET,status_RaRcL,PARM,RaRcL,TYPE
+*GET,status_RaRcL,PARM,RaRcL,TYPE
+
+/COM,---------------------------------------------------------------------------
 /COM,ABBREVIATIONS
 /COM,---------------------------------------------------------------------------
 
@@ -92,6 +109,6 @@ SELTOL,micrometer/1000
 *ABBR,'MESH',/INPUT,BoB-6-mesh,inp
 *ABBR,'BC',/INPUT,BoB-4-BCs,inp
 *ABBR,'CRACKLESS',/INPUT,BoB-8-stress,inp
-! *ABBR,'STRESS_EXP',/INPUT,BoB-8-stress-export,inp
+*ABBR,'STRESS_JSON',/INPUT,BoB-8-stress-export,inp
 *ABBR,'CRACKED',/INPUT,BoB-9-energy,inp
 ! *ABBR,'ENERGY_EXP',/INPUT,ball-on-ball-9-energy-export,inp
