@@ -94,7 +94,7 @@ SELTOL,micrometer/1000
 *GET,status_RaL,PARM,RaL,TYPE
 *GET,status_RaU,PARM,RaU,TYPE
 *GET,status_RaRcL,PARM,RaRcL,TYPE
-*GET,status_RaRcL,PARM,RaRcL,TYPE
+*GET,status_RaRcU,PARM,RaRcU,TYPE
 
 /COM,---------------------------------------------------------------------------
 /COM,ABBREVIATIONS

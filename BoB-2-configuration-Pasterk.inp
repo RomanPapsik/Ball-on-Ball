@@ -14,11 +14,11 @@
 ! Obtain also energy release rates
 *SET,simulate_cracks,false
 
-! Should force or displacement act on the ball
-*SET,displacement_controlled,false
-
 ! Consider large deformations as geometric non-linearities
 *SET,large_deformations,false
+
+! Should force or displacement act on the ball
+*SET,displacement_controlled,false
 
 /COM,---------------------------------------------------------------------------
 /COM,MATERIAL
@@ -56,40 +56,50 @@
 /COM,BALL RADII
 /COM,---------------------------------------------------------------------------
 
-*IF,RbL,LE,1E-18,THEN
-	! Take default value
-	*SET,ball_radius_lower,7.935/2*millimeter
-*ELSE
+! Mandatory lower ball
+*IF,status_RbL,EQ,defined,THEN
 	! Take command line value
 	*SET,ball_radius_lower,RbL*millimeter
+*ELSE
+	! Take default value
+	*SET,ball_radius_lower,7.935/2*millimeter
 *ENDIF
 
-*IF,RbU,LE,1E-18,THEN
-	! Take default value
-	*SET,ball_radius_upper,ball_radius_lower
-*ELSE
+! Optional upper ball
+*IF,status_RbU,EQ,defined,THEN
 	! Take command line value
 	*SET,ball_radius_lower,RbU*millimeter
+*ELSE
+	! Take default value
+	*SET,ball_radius_upper,ball_radius_lower
 *ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,CRACK
 /COM,---------------------------------------------------------------------------
 
-*IF,simulate_cracks,EQ,true,THEN
-	! Crack radius
-	*IF,RaL,LE,1E-18,AND,RaRcL,LE,1E-18,THEN
-		! Take default value
-		*SET,crack_multiplier_lower,1.1
-	*ENDIF
+! Default crack position
+*SET,crack_multiplier_lower,1.0
+*SET,crack_multiplier_upper,1.0
 
-	*IF,RaU,LE,1E-18,AND,RaRcU,LE,1E-18,THEN
+*IF,status_RaL,EQ,undefined,AND,simulate_cracks,EQ,true,THEN
+	! Normalized crack radius
+	*IF,status_RaRcL,EQ,defined,THEN
+		! Take command line value
+		*SET,crack_multiplier_lower,RaRcL
+	*ELSE
 		! Take default value
-		*SET,crack_multiplier_upper,crack_multiplier_lower
+		*SET,crack_multiplier_lower,1.2
 	*ENDIF
-*ELSE
-	*SET,crack_multiplier_lower,1.0
-	*SET,crack_multiplier_upper,1.0
+*ENDIF
+
+*IF,status_RaU,EQ,undefined,AND,simulate_cracks,EQ,true,THEN
+	! Normalized crack radius
+	*IF,status_RaRcU,EQ,defined,THEN
+		! Take command line value
+		*SET,crack_multiplier_upper,RaRcU
+	*ELSE
+		*SET,crack_multiplier_upper,1.2
 *ENDIF
 
 ! Crack angle declination from the surface
