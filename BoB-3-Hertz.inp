@@ -34,17 +34,17 @@
 
 ! Contact half angle from axis
 *AFUN,DEG
-*SET,contact_angle_upper,ASIN(contact_radius_hertz/ball_radius_upper)
 *SET,contact_angle_lower,ASIN(contact_radius_hertz/ball_radius_lower)
+*SET,contact_angle_upper,ASIN(contact_radius_hertz/ball_radius_upper)
 
 ! Contact arc length
-*SET,contact_arc_length_upper,ball_radius_upper*contact_angle_upper*PI/180
 *SET,contact_arc_length_lower,ball_radius_lower*contact_angle_lower*PI/180
+*SET,contact_arc_length_upper,ball_radius_upper*contact_angle_upper*PI/180
 
 ! Contact sagitta (height from symmetry line)
 *AFUN,DEG
-*SET,contact_sagitta_upper,ball_radius_upper*(1-COS(contact_angle_upper))
 *SET,contact_sagitta_lower,ball_radius_lower*(1-COS(contact_angle_lower))
+*SET,contact_sagitta_upper,ball_radius_upper*(1-COS(contact_angle_upper))
 
 /COM,---------------------------------------------------------------------------
 /COM,PRESSURES AND STRESSES
