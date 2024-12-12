@@ -15,7 +15,7 @@
 *SET,simulate_cracks,false
 
 ! Consider large deformations as geometric non-linearities
-*SET,large_deformations,false
+*SET,large_deformations,true
 
 ! Should force or displacement act on the ball
 *SET,displacement_controlled,false

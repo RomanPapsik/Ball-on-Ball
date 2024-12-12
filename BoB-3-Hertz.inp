@@ -57,8 +57,8 @@
 *SET,maximum_pressure_hertz,1.5*mean_pressure_hertz
 
 ! Maximum radial stress
-*SET,maximum_stress_hertz_lower,(1-2*poisson_ratio_lower)/2*mean_pressure_hertz
-*SET,maximum_stress_hertz_upper,(1-2*poisson_ratio_upper)/2*mean_pressure_hertz
+*SET,maximum_stress_hertz_lower,(0.5-poisson_ratio_lower)*mean_pressure_hertz
+*SET,maximum_stress_hertz_upper,(0.5-poisson_ratio_upper)*mean_pressure_hertz
 
 /COM,---------------------------------------------------------------------------
 /COM,CRACK

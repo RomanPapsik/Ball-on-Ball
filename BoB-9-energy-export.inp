@@ -116,14 +116,6 @@ FINISH
 *VWRITE,area_total
 ('"area_total":                                      ',EN28.9E2,',')
 
-! Energies
-*VWRITE,energy_crackless_upper
-('"energy_crackless_upper":                          ',EN28.12E2,',')
-*VWRITE,energy_crackless_lower
-('"energy_crackless_lower":                          ',EN28.12E2,',')
-*VWRITE,energy_crackless_total
-('"energy_crackless_total":                          ',EN28.12E2,',')
-
 *VWRITE,energy_cracked_upper
 ('"energy_cracked_upper":                            ',EN28.12E2,',')
 *VWRITE,energy_cracked_lower
