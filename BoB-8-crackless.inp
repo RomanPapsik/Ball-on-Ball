@@ -90,8 +90,10 @@ SSUM
 ! Set sum of strain energy over all elements
 *GET,energy_crackless_lower,SSUM,0,ITEM,energy
 
-*IF,simulate_two_balls,EQ,true,THEN
-
+*IF,simulate_two_balls,EQ,false,THEN
+	! Second ball was not simulated
+	*SET,energy_crackless_upper,0
+*ELSE
 	! Select elements of the ball
 	CMSEL,S,area_ball_upper,AREA
 	ESLA,S $ ESEL,R,TYPE,,element_structural
@@ -101,14 +103,12 @@ SSUM
 	SSUM
 	! Set sum of strain energy over all elements
 	*GET,energy_crackless_upper,SSUM,0,ITEM,energy
-*ELSE
-	*SET,energy_crackless_lower,0
 *ENDIF
 
 *SET,energy_crackless_total,energy_crackless_upper+energy_crackless_lower
 
 /COM,---------------------------------------------------------------------------
-/COM,STRESS FIELD
+/COM,PLOT STRESS FIELD
 /COM,---------------------------------------------------------------------------
 
 /POST1
@@ -135,7 +135,39 @@ NSEL,ALL
 PLESOL,S,Y
 
 /COM,---------------------------------------------------------------------------
-/COM,PATH ON SURFACE
+/COM,RETRIEVE RESULTS ON THE SURFACE
+/COM,---------------------------------------------------------------------------
+
+/POST1
+
+! Select nodes on the surface
+CSYS,cs_ball_lower
+ESEL,S,TYPE,,element_structural
+NSLE,S,CORNER
+NSEL,R,LOC,X,ball_radius_lower,ball_radius_lower
+*GET,selected_nodes_count,NODE,,COUNT
+*DEL,node_list,,NOPR
+*VLEN,selected_nodes_count
+*VGET,node_list,NODE,,NLIST
+
+! Retrieve results for selected nodes
+*DEL,stresses_surface,,NOPR
+*DIM,stresses_surface,ARRAY,selected_nodes_count,5
+RSYS,cs_ball_lower
+*DO,n,1,selected_nodes_count
+	! Angle of node
+	*GET,stresses_surface(n,1),NODE,node_list(n),LOC,Y
+	! Stresses
+	*GET,stresses_surface(n,2),NODE,node_list(n),S,X
+	*GET,stresses_surface(n,3),NODE,node_list(n),S,Y
+	*GET,stresses_surface(n,4),NODE,node_list(n),S,Z
+	*GET,stresses_surface(n,5),NODE,node_list(n),S,1
+*ENDDO
+! Sort by angle
+*DEL,void,,NOPR $ *MOPER,void,stresses_surface,SORT,,1
+
+/COM,---------------------------------------------------------------------------
+/COM,PLOT PATH SURFACE
 /COM,---------------------------------------------------------------------------
 
 /POST1
@@ -145,7 +177,7 @@ ESEL,S,TYPE,,element_structural $ NSLE,S,1
 ! Calculate path division
 *SET,path_division,NINT((contact_arc_length_lower)/(micrometer/4))
 ! Initialize new path
-PATH,path_on_surface,2,10,path_division
+PATH,path_surface,2,10,path_division
 ! Define path
 CSYS,cs_ball_lower
 PPATH,1,node(ball_radius_lower,0,0),,,,cs_ball_lower
@@ -162,18 +194,17 @@ PDEF,S3,S,3
 
 ! Plot paths
 /TITLE,Path on the lower ball surface
-/AXLAB,X,Path position [um]
-/AXLAB,Y,Stress components [MPa]
+/AXLAB,X,Surface path [um]
+/AXLAB,Y,Stress component [MPa]
 ! /XRANGE,contact_radius*0.95,2*contact_radius*1.05
 ! /YRANGE,-stress_maximum*2,+stress_maximum*2
 PLPATH,Stang,Snorm,Shoop
-PLGEOM,Stang,Snorm,Shoop
 ! Save current path into an array
-PAGET,path_on_surface,TABLE
+PAGET,path_surface,TABLEe
 ALLSEL,ALL
 
 /COM,---------------------------------------------------------------------------
-/COM,STRESS PATH IN DEPTH
+/COM,PLOT PATH CRACK
 /COM,---------------------------------------------------------------------------
 
 *IF,simulate_cracks,EQ,true,THEN
@@ -182,32 +213,36 @@ ALLSEL,ALL
 CSYS,cs_ball_lower
 RSYS,cs_ball_lower
 
-! Define new path
-ESEL,S,TYPE,,element_structural
-NSLE,S,1
-*SET,path_length,ball_radius_upper*0.05
-*SET,path_segments,NINT(path_length/(micrometer/10))
-PATH,path_in_depth,2,10,path_segments
-PPATH,1,node(ball_radius_upper,crack_angle_upper,0)
-PPATH,2,node(ball_radius_upper-path_length,crack_angle_upper,0)
+! Select structural elements of the ball
+ESEL,S,TYPE,,element_structural $ NSLE,S,1
+! Calculate path division
+*SET,path_length,ball_radius_lower*0.05
+*SET,path_division,NINT(path_length/(micrometer/10))
+! Initialize new path
+PATH,path_in_depth,2,10,path_division
+! Define path
+CSYS,cs_ball_lower
+PPATH,1,node(ball_radius_lower,crack_angle_lower,0)
+PPATH,2,node(ball_radius_lower-path_length,crack_angle_lower,0)
 
 ! Map onto path
-PDEF,Srad,S,X
-PDEF,Sthe,S,Y
-PDEF,Sphi,S,Z
-PDEF,Sfir,S,1
-PDEF,Ssec,S,2
-PDEF,Sthi,S,3
+PDEF,Snorm,S,X
+PDEF,Stang,S,Y
+PDEF,Shoop,S,Z
+PDEF,S1,S,1
+PDEF,S2,S,2
+PDEF,S3,S,3
 
 ! Plot paths
-/AXLAB,X,Location [um]
-/AXLAB,Y,Stress [MPa]
+/TITLE,Path along the crack
+/AXLAB,X,Crack path [um]
+/AXLAB,Y,Stress component [MPa]
 ! /XRANGE,0,10*micrometer
 ! /YRANGE,-stress_maximum,+stress_maximum
-PLPATH,Srad,Sthe,Sphi
+PLPATH,Stang,Snorm,Shoop
 
 ! Save current path into an array
-PAGET,path_in_depth,TABLE
+PAGET,path_crack,TABLE
 ALLSEL,ALL
 
 *ENDIF
