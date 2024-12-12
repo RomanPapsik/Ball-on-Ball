@@ -72,6 +72,8 @@ RSYS,cs_ball_lower
 *IF,simulate_two_balls,EQ,true,THEN
 	RSYS,cs_ball_upper
 	*GET,displacement_crackless_upper,NODE,loaded_node_upper,U,X
+*ELSE
+	*SET,displacement_crackless_upper,displacement_crackless_lower
 *ENDIF
 
 /COM,---------------------------------------------------------------------------
@@ -105,7 +107,7 @@ SSUM
 	*GET,energy_crackless_upper,SSUM,0,ITEM,energy
 *ENDIF
 
-*SET,energy_crackless_total,energy_crackless_upper+energy_crackless_lower
+*SET,energy_crackless_total,energy_crackless_lower+energy_crackless_upper
 
 /COM,---------------------------------------------------------------------------
 /COM,PLOT STRESS FIELD

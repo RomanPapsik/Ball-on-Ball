@@ -9,16 +9,23 @@ FINISH
 /COM,---------------------------------------------------------------------------
 
 ! Create a file name
-*DEL,thefile
-*DIM,thefile,STRING,128
-*SET,thefile(1),'stress-Rbu-%CHRVAL(ball_radius_upper)%-Rbl-%CHRVAL(ball_radius_lower)%-F-%CHRVAL(force)%-Rau-%CHRVAL(crack_radius_upper*1000)%'
+*DEL,filename,,NOPR
+*DIM,filename,STRING,128
+*SET,token_1,'BB-%CHRVAL(simulate_two_balls)%'
+*SET,token_2,'LD-%CHRVAL(large_deformations)%'
+*SET,token_3,'DC-%CHRVAL(displacement_controlled)%'
+*SET,token_3,'SC-%CHRVAL(simulate_cracks)%'
+*SET,token_5,'RbL-%CHRVAL(ball_radius_lower)%-RbU-%CHRVAL(ball_radius_upper)%'
+*SET,token_6,'F-%CHRVAL(force)%'
+*SET,token_7,'RaL-%CHRVAL(crack_radius_lower)%-RaU-%CHRVAL(crack_radius_upper)%'
+*SET,filename(1),'%token_1%-%token_2%-%token_3%-%token_4%-%token_5%-%token_6%-%token_7%'
 
 /COM,---------------------------------------------------------------------------
 /COM,OPEN FILE
 /COM,---------------------------------------------------------------------------
 
 ! Open the output JSON file
-*CFOPEN,thefile(1),json
+*CFOPEN,filename(1),json
 
 /COM,---------------------------------------------------------------------------
 /COM,WRITE RESULTS
@@ -28,33 +35,37 @@ FINISH
 *VWRITE,
 ('{')
 
-! Information about ball material
-*VWRITE,young_modulus
-('"young_modulus":                                   ',EN28.9E2,',')
-*VWRITE,poisson_ratio
-('"poisson_ratio":                                   ',EN28.9E2,',')
-
-! Information about options
+! Chosen options
 *VWRITE,simulate_two_balls
 ('"simulate_two_balls":                              ',EN28.1E2,',')
-*VWRITE,simulate_cracks
-('"simulate_cracks":                                 ',EN28.1E2,',')
+*VWRITE,large_deformations
+('"large_deformations":                              ',EN28.1E2,',')
 *VWRITE,displacement_controlled
 ('"displacement_controlled":                         ',EN28.1E2,',')
+*VWRITE,simulate_cracks
+('"simulate_cracks":                                 ',EN28.1E2,',')
 
-! Information about geometry
-*VWRITE,ball_radius_upper
-('"ball_radius_upper":                               ',EN28.9E2,',')
+! Information about materials
+*VWRITE,young_modulus_upper
+('"lower_ball_young_modulus":                        ',EN28.9E2,',')
+*VWRITE,poisson_ratio_lower
+('"lower_ball_poisson_ratio":                        ',EN28.9E2,',')
+*VWRITE,young_modulus_lower
+('"upper_ball_young_modulus":                        ',EN28.9E2,',')
+*VWRITE,poisson_ratio_upper
+('"upper_ball_poisson_ratio":                        ',EN28.9E2,',')
+
+! Information about ball geometry
 *VWRITE,ball_radius_lower
 ('"ball_radius_lower":                               ',EN28.9E2,',')
+*VWRITE,ball_radius_upper
+('"ball_radius_upper":                               ',EN28.9E2,',')
 
 ! Information about load
 *VWRITE,force
 ('"force":                                           ',EN28.9E2,',')
-*VWRITE,downward_displacement
-('"downward_displacement":                           ',EN28.9E2,',')
 
-! Information about contact
+! Hertz theory compliance and curvature
 *VWRITE,effective_compliance
 ('"effective_compliance":                            ',EN28.9E2,',')
 *VWRITE,effective_stiffness
@@ -63,22 +74,50 @@ FINISH
 ('"effective_curvature":                             ',EN28.9E2,',')
 *VWRITE,effective_radius
 ('"effective_radius":                                ',EN28.9E2,',')
-*VWRITE,contact_radius
-('"contact_radius":                                  ',EN28.9E2,',')
-*VWRITE,contact_angle_upper
-('"contact_angle_upper":                             ',EN28.9E2,',')
+! Hertz theory contact region
+*VWRITE,contact_radius_hertz
+('"contact_radius_hertz":                            ',EN28.9E2,',')
+*VWRITE,contact_area_hertz
+('"contact_area_hertz":                              ',EN28.9E2,',')
 *VWRITE,contact_angle_lower
 ('"contact_angle_lower":                             ',EN28.9E2,',')
-*VWRITE,contact_arc_length_upper
-('"contact_arc_length_upper":                        ',EN28.9E2,',')
+*VWRITE,contact_angle_upper
+('"contact_angle_upper":                             ',EN28.9E2,',')
 *VWRITE,contact_arc_length_lower
 ('"contact_arc_length_lower":                        ',EN28.9E2,',')
-*VWRITE,mean_pressure
-('"mean_pressure":                                   ',EN28.9E2,',')
-*VWRITE,maximum_pressure
-('"maximum_pressure":                                ',EN28.9E2,',')
-*VWRITE,maximum_stress
-('"maximum_stress":                                  ',EN28.9E2,',')
+*VWRITE,contact_arc_length_upper
+('"contact_arc_length_upper":                        ',EN28.9E2,',')
+! Hertz theory pressures and stresses
+*VWRITE,mean_pressure_hertz
+('"mean_pressure_hertz":                             ',EN28.9E2,',')
+*VWRITE,maximum_pressure_hertz
+('"maximum_pressure_hertz":                          ',EN28.9E2,',')
+*VWRITE,maximum_stress_hertz_lower
+('"maximum_stress_hertz_lower":                      ',EN28.9E2,',')
+*VWRITE,maximum_stress_hertz_upper
+('"maximum_stress_hertz_upper":                      ',EN28.9E2,',')
+
+! Displacements
+*VWRITE,displacement_crackless_lower
+('"displacement_crackless_lower":                    ',EN28.9E2,',')
+*VWRITE,displacement_crackless_upper
+('"displacement_crackless_upper":                    ',EN28.9E2,',')
+
+! Energies
+*VWRITE,energy_crackless_upper
+('"energy_crackless_upper":                          ',EN28.12E2,',')
+*VWRITE,energy_crackless_lower
+('"energy_crackless_lower":                          ',EN28.12E2,',')
+*VWRITE,energy_crackless_total
+('"energy_crackless_total":                          ',EN28.12E2,',')
+
+! Crack geometry if simulated
+*IF,simulate_cracks,EQ,true,THEN
+*VWRITE,crack_radius_lower
+('"crack_radius_lower":                              ',EN28.9E2,',')
+*VWRITE,crack_angle_upper
+('"crack_angle_upper":                               ',EN28.9E2,',')
+*ENDIF
 
 ! Information about mesh
 *VWRITE,nodes_count
@@ -86,32 +125,27 @@ FINISH
 *VWRITE,elements_count
 ('"elements_count":                                  ',EN28.9E2,',')
 
-*VWRITE,crack_radius_upper
-('"crack_radius_upper":                              ',EN28.9E2,',')
-*VWRITE,crack_angle_upper
-('"crack_angle_upper":                               ',EN28.9E2,',')
-
+! Path on the surface
 *VWRITE,
-('"path_on_surface": [')
-*GET,dimensions,PARM,path_on_surface,DIM,1
-*VLEN,dimensions-1
-*VWRITE,path_on_surface(1,1),path_on_surface(1,2),path_on_surface(1,5),path_on_surface(1,6),path_on_surface(1,7),path_on_surface(1,8),path_on_surface(1,9),path_on_surface(1,10)
-('[',EN18.9E2,7(',',EN18.9E2),'],')
-*VWRITE,path_on_surface(dimensions,1),path_on_surface(dimensions,2),path_on_surface(dimensions,5),path_on_surface(dimensions,6),path_on_surface(dimensions,7),path_on_surface(dimensions,8),path_on_surface(dimensions,9),path_on_surface(dimensions,10)
-('[',EN18.9E2,7(',',EN18.9E2),']')
-*VWRITE,
-('],')
-
-*VWRITE,
-('"path_in_depth": [')
-*GET,dimensions,PARM,path_in_depth,DIM,1
-*VLEN,dimensions-1
-*VWRITE,path_in_depth(1,1),path_in_depth(1,2),path_in_depth(1,5),path_in_depth(1,6),path_in_depth(1,7),path_in_depth(1,8),path_in_depth(1,9),path_in_depth(1,10)
-('[',EN18.9E2,7(',',EN18.9E2),'],')
-*VWRITE,path_in_depth(dimensions,1),path_in_depth(dimensions,2),path_in_depth(dimensions,5),path_in_depth(dimensions,6),path_in_depth(dimensions,7),path_in_depth(dimensions,8),path_in_depth(dimensions,9),path_in_depth(dimensions,10)
-('[',EN18.9E2,7(',',EN18.9E2),']')
+('"stresses_surface":')
+*VLEN,1
+*VWRITE,stresses_surface(1,1),stresses_surface(1,2),stresses_surface(1,3),stresses_surface(1,4),stresses_surface(1,5)
+('[[',EN18.9E2,4(',',EN18.9E2),']')
+*VWRITE,stresses_surface(2,1),stresses_surface(2,2),stresses_surface(2,3),stresses_surface(2,4),stresses_surface(2,5)
+(',[',EN18.9E2,4(',',EN18.9E2),']')
 *VWRITE,
 (']')
+
+! *VWRITE,
+! ('"path_in_depth": [')
+! *GET,dimensions,PARM,path_in_depth,DIM,1
+! *VLEN,dimensions-1
+! *VWRITE,path_in_depth(1,1),path_in_depth(1,2),path_in_depth(1,5),path_in_depth(1,6),path_in_depth(1,7),path_in_depth(1,8),path_in_depth(1,9),path_in_depth(1,10)
+! ('[',EN18.9E2,7(',',EN18.9E2),'],')
+! *VWRITE,path_in_depth(dimensions,1),path_in_depth(dimensions,2),path_in_depth(dimensions,5),path_in_depth(dimensions,6),path_in_depth(dimensions,7),path_in_depth(dimensions,8),path_in_depth(dimensions,9),path_in_depth(dimensions,10)
+! ('[',EN18.9E2,7(',',EN18.9E2),']')
+! *VWRITE,
+! (']')
 
 ! Closing bracket
 *VWRITE,
