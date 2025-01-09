@@ -1,6 +1,6 @@
 {
 	"editor.insertSpaces": false,
-	"editor.tabSize": 3,
+	"editor.tabSize": 4,
 	"editor.detectIndentation": false,
 	"files.exclude": {
 		"*.page": true,
@@ -18,7 +18,6 @@
 		"*.r0*": true,
 		"*.rdb": true,
 		"*.stat": true,
-		"*.err": true,
 		"*.gui": true,
 		"*.rst": true,
 		"*.tmp": true
