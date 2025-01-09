@@ -179,7 +179,7 @@ ESEL,S,TYPE,,element_structural $ NSLE,S,1
 ! Calculate path division
 *SET,path_division,NINT((contact_arc_length_lower)/(micrometer/4))
 ! Initialize new path
-PATH,path_surface,2,10,path_division
+PATH,path_surface,2,13,path_division
 ! Define path
 CSYS,cs_ball_lower
 PPATH,1,node(ball_radius_lower,0,0),,,,cs_ball_lower
@@ -193,6 +193,9 @@ PDEF,Shoop,S,Z
 PDEF,S1,S,1
 PDEF,S2,S,2
 PDEF,S3,S,3
+PDEF,Enorm,EPEL,X
+PDEF,Etang,EPEL,Y
+PDEF,Ehoop,EPEL,Z
 
 ! Plot paths
 /TITLE,Path on the lower ball surface
@@ -202,7 +205,7 @@ PDEF,S3,S,3
 ! /YRANGE,-stress_maximum*2,+stress_maximum*2
 PLPATH,Stang,Snorm,Shoop
 ! Save current path into an array
-PAGET,path_surface,TABLEe
+PAGET,path_surface,TABLE
 ALLSEL,ALL
 
 /COM,---------------------------------------------------------------------------
