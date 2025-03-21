@@ -1,0 +1,111 @@
+/COM,===========================================================================
+/COM,CONFIGURATION
+/COM,===========================================================================
+
+/PREP7cs
+
+/COM,---------------------------------------------------------------------------
+/COM,SWITCHES
+/COM,---------------------------------------------------------------------------
+
+! If both balls are the the same, only one is required to obtain stresses
+*SET,simulate_two_balls,true
+
+! Obtain also energy release rates
+*SET,simulate_cracks,false
+
+! Consider large deformations as geometric non-linearities
+*SET,large_deformations,true
+
+! Should force or displacement act on the ball
+*SET,displacement_controlled,false
+
+/COM,---------------------------------------------------------------------------
+/COM,MATERIAL
+/COM,---------------------------------------------------------------------------
+
+! Name of the lower ball material
+*DIM,material_name_lower,STRING,5
+*SET,material_name_lower(1),'Si3N4'
+
+! Name of the upper ball material
+*DIM,material_name_upper,STRING,5
+*SET,material_name_upper(1),'Si3N4'
+
+! Young's modulus
+*SET,young_modulus_lower,289.9*gigapascal
+*SET,young_modulus_upper,289.9*gigapascal
+
+! Poisson's ratio
+*SET,poisson_ratio_lower,0.268
+*SET,poisson_ratio_upper,0.268
+
+/COM,---------------------------------------------------------------------------
+/COM,FORCE MAGNITUDE
+/COM,---------------------------------------------------------------------------
+
+*IF,status_Fc,EQ,defined,THEN
+	! Take command line value
+	*SET,force,Fc*newton
+*ELSE
+	! Take default value
+	! *SET,force,5874*newton
+	*SET,force,9156*newton
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,BALL RADII
+/COM,---------------------------------------------------------------------------
+
+! Mandatory lower ball
+*IF,status_RbL,EQ,defined,THEN
+	! Take command line value
+	*SET,ball_radius_lower,RbL*millimeter
+*ELSE
+	! Take default value
+	! *SET,ball_radius_lower,(17.46/2)*millimeter
+	! *SET,ball_radius_lower,(47.625/2)*millimeter
+	*SET,ball_radius_lower,(50.8/2)*millimeter
+*ENDIF
+
+! Optional upper ball
+*IF,status_RbU,EQ,defined,THEN
+	! Take command line value
+	*SET,ball_radius_lower,RbU*millimeter
+*ELSE
+	! Take default value
+	*SET,ball_radius_upper,(17.46/2)*millimeter
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,CRACK
+/COM,---------------------------------------------------------------------------
+
+! Default crack position
+*SET,crack_multiplier_lower,1.0
+*SET,crack_multiplier_upper,1.0
+
+*IF,status_RaL,EQ,undefined,AND,simulate_cracks,EQ,true,THEN
+	! Normalized crack radius
+	*IF,status_RaRcL,EQ,defined,THEN
+		! Take command line value
+		*SET,crack_multiplier_lower,RaRcL
+	*ELSE
+		! Take default value
+		*SET,crack_multiplier_lower,1.2
+	*ENDIF
+*ENDIF
+
+*IF,status_RaU,EQ,undefined,AND,simulate_cracks,EQ,true,THEN
+	! Normalized crack radius
+	*IF,status_RaRcU,EQ,defined,THEN
+		! Take command line value
+		*SET,crack_multiplier_upper,RaRcU
+	*ELSE
+		*SET,crack_multiplier_upper,crack_multiplier_lower
+*ENDIF
+
+! Crack angle declination from the surface
+*AFUN,DEG
+*SET,crack_declination_lower,0
+*SET,crack_declination_upper,0
