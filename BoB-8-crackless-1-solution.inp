@@ -1,0 +1,60 @@
+/COM,===========================================================================
+/COM,MODEL WITHOUT A CRACK SOLUTION
+/COM,===========================================================================
+
+/PREP7
+
+/COM,---------------------------------------------------------------------------
+/COM,CLOSE CRACKS
+/COM,---------------------------------------------------------------------------
+
+*IF,simulate_cracks,EQ,true,THEN
+	! Upper crack
+	CMSEL,S,crack_face_upper_inner
+	CMSEL,A,crack_face_upper_outer
+	NSLL,S,1
+	NUMMRG,NODE,stitching_precision_upper
+	! Lower crack
+	CMSEL,S,crack_face_lower_inner
+	CMSEL,A,crack_face_lower_outer
+	NSLL,S,1
+	NUMMRG,NODE,stitching_precision_lower
+*ENDIF
+
+! Select everything
+ALLSEL,ALL
+
+/COM,---------------------------------------------------------------------------
+/COM,SOLUTION
+/COM,---------------------------------------------------------------------------
+
+/SOLU
+
+! New analysis
+ANTYPE,STATIC,NEW
+
+! Substeps
+AUTOTS,ON
+NSUBST,3000,3000,1000
+
+! Save all nodal data for every substep
+OUTRES,ALL,ALL
+
+! Direct sparse solver
+EQSLV,SPAR
+DSPOPTION,,INCORE
+
+! Finite deformations
+*IF,large_deformations,EQ,true,THEN
+	NLGEOM,ON
+*ELSE
+	NLGEOM,OFF
+*ENDIF
+
+! Select everything
+ALLSEL,ALL
+
+! Solve
+/UIS,MSGPOP,3
+SOLVE
+/UIS,MSGPOP,0

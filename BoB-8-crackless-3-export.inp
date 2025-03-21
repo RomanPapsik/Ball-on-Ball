@@ -41,13 +41,13 @@ FINISH
 
 ! Chosen options
 *VWRITE,simulate_two_balls
-"simulate_two_balls": %57I,
+"simulate_two_balls": %I,
 *VWRITE,large_deformations
-"large_deformations": %57I,
+"large_deformations": %I,
 *VWRITE,displacement_controlled
-"displacement_controlled": %52I,
+"displacement_controlled": %I,
 *VWRITE,simulate_cracks
-"simulate_cracks": %60I,
+"simulate_cracks": %I,
 
 ! Information about materials
 *VWRITE,young_modulus_upper

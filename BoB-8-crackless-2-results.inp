@@ -1,69 +1,19 @@
 /COM,===========================================================================
-/COM,STRESSES
+/COM,MODEL WITHOUT A CRACK SOLUTION
 /COM,===========================================================================
 
-/COM,---------------------------------------------------------------------------
-/COM,CLOSE CRACKS
-/COM,---------------------------------------------------------------------------
+/POST1
 
-/PREP7
-
-*IF,simulate_cracks,EQ,true,THEN
-	! Upper crack
-	CMSEL,S,crack_face_upper_inner
-	CMSEL,A,crack_face_upper_outer
-	NSLL,S,1
-	NUMMRG,NODE,stitching_precision_upper
-	! Lower crack
-	CMSEL,S,crack_face_lower_inner
-	CMSEL,A,crack_face_lower_outer
-	NSLL,S,1
-	NUMMRG,NODE,stitching_precision_lower
-*ENDIF
-
-! Select everything
-ALLSEL,ALL
-
-/COM,---------------------------------------------------------------------------
-/COM,SOLUTION
-/COM,---------------------------------------------------------------------------
-
-/SOLU
-
-! New analysis
-ANTYPE,STATIC,NEW
-
-! Substeps
-AUTOTS,ON
-NSUBST,3000,3000,1000
-
-! Save all nodal data for every substep
-OUTRES,ALL,ALL
-
-! Direct sparse solver
-EQSLV,SPAR
-DSPOPTION,,INCORE
-
-! Finite deformations
-*IF,large_deformations,EQ,true,THEN
-	NLGEOM,ON
-*ELSE
-	NLGEOM,OFF
-*ENDIF
-
-! Select everything
-ALLSEL,ALL
-
-! Solve
-/UIS,MSGPOP,3
-SOLVE
-/UIS,MSGPOP,0
+*SET,retrieve_displacement,true
+*SET,retrieve_energy,true
+*SET,retrieve_surface_stress,false
+*SET,retrieve_field_stress,true
 
 /COM,---------------------------------------------------------------------------
 /COM,DISPLACEMENT
 /COM,---------------------------------------------------------------------------
 
-/POST1
+*IF,retrieve_displacement,EQ,true,THEN
 
 ! Displacement towards the contact point
 RSYS,cs_ball_lower
@@ -76,11 +26,13 @@ RSYS,cs_ball_lower
 	*SET,displacement_crackless_upper,displacement_crackless_lower
 *ENDIF
 
+*ENDIF
+
 /COM,---------------------------------------------------------------------------
 /COM,STRAIN ENERGY
 /COM,---------------------------------------------------------------------------
 
-/POST1
+*IF,retrieve_energy,EQ,true,THEN
 
 ! Select elements of the ball
 CMSEL,S,area_ball_lower,AREA
@@ -109,38 +61,13 @@ SSUM
 
 *SET,energy_crackless_total,energy_crackless_lower+energy_crackless_upper
 
-/COM,---------------------------------------------------------------------------
-/COM,PLOT STRESS FIELD
-/COM,---------------------------------------------------------------------------
-
-/POST1
-
-! Select surface nodes
-CSYS,cs_ball_lower
-NSEL,S,LOC,X,0,ball_radius_upper
-NSEL,R,LOC,Y,0,2*contact_angle_upper
-! Sort selected nodes by tangential stress
-RSYS,cs_ball_lower
-NSORT,S,Y
-! Get maximal and minimal tangential stress
-*GET,minimal_stress,SORT,,MIN
-*GET,maximal_stress,SORT,,MAX
-! Get numbers of nodes an maximal and minimal stress locations
-*GET,minimal_stress_node,SORT,,IMIN
-*GET,maximal_stress_node,SORT,,IMAX
-! Select everything
-NSEL,ALL
-! Change range of plotted values
-*SET,absolute_maximum,MAX(ABS(minimal_stress),ABS(maximal_stress))
-/CONTOUR,ALL,10,-absolute_maximum,,absolute_maximum
-! Plot stress field
-PLESOL,S,Y
+*ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,RETRIEVE RESULTS ON THE SURFACE
 /COM,---------------------------------------------------------------------------
 
-/POST1
+*IF,retrieve_surface_stress,EQ,true,THEN
 
 ! Select nodes on the surface
 CSYS,cs_ball_lower
@@ -180,6 +107,35 @@ NSEL,R,LOC,X,ball_radius_lower,ball_radius_lower
 *ENDDO
 ! Sort by angle
 *DEL,void,,NOPR $ *MOPER,void,stresses_surface_lower,SORT,,1
+
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,PLOT STRESS FIELD
+/COM,---------------------------------------------------------------------------
+
+/POST1
+
+! Select surface nodes
+CSYS,cs_ball_lower
+NSEL,S,LOC,X,0,ball_radius_upper
+NSEL,R,LOC,Y,0,2*contact_angle_upper
+! Sort selected nodes by tangential stress
+RSYS,cs_ball_lower
+NSORT,S,Y
+! Get maximal and minimal tangential stress
+*GET,minimal_stress,SORT,,MIN
+*GET,maximal_stress,SORT,,MAX
+! Get numbers of nodes an maximal and minimal stress locations
+*GET,minimal_stress_node,SORT,,IMIN
+*GET,maximal_stress_node,SORT,,IMAX
+! Select everything
+NSEL,ALL
+! Change range of plotted values
+*SET,absolute_maximum,MAX(ABS(minimal_stress),ABS(maximal_stress))
+/CONTOUR,ALL,10,-absolute_maximum,,absolute_maximum
+! Plot stress field
+PLESOL,S,Y
 
 /COM,---------------------------------------------------------------------------
 /COM,PLOT PATH SURFACE
