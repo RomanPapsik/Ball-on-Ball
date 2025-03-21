@@ -9,8 +9,8 @@
 *SET,replace_force_with_displacement,false
 
 ! Crack increment length
-*SET,crack_increment,1*micrometer!element_size_upper/(3**4)
-*SET,crack_length_limit,15*micrometer
+*SET,crack_increment,1*micrometer
+*SET,crack_length_limit,10*micrometer
 
 /COM,---------------------------------------------------------------------------
 /COM,LOOPS INITIATION
@@ -19,11 +19,13 @@
 ! Number of loops
 *SET,loops_count,NINT(crack_length_limit/crack_increment)+1
 
-! Loop
-*DO,loop_upper,loops_count,1,-1
-*DO,loop_lower,loops_count,1,-1
-/GOPR
-*IF,loop_upper,NE,loop_lower,AND,loop_lower,NE,1,CYCLE
+! Crack in lower ball
+*DO,loop_lower,1,loops_count,+1
+
+! Crack in optional upper ball
+*IF,simulate_two_balls,EQ,true,THEN
+*DO,loop_upper,1,loops_count,+1
+*ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,RESUME WITH CRACKED MODEL
@@ -37,9 +39,10 @@ RESUME,cracked,tmp,,0,1
 PARRES,NEW,parameters,tmp
 
 /COM,---------------------------------------------------------------------------
-/COM,RELOAD
+/COM,OPTIONAL CHANGE OF THE BOUNDARY CONDITION
 /COM,---------------------------------------------------------------------------
 
+*IF,replace_force_with_displacement,EQ,true,THEN
 /PREP7
 
 ! Remove force
@@ -54,6 +57,10 @@ NSEL,A,LOC,X,0,0
 CSYS,0
 D,ALL,UY,-downward_displacement_crackless
 NSEL,ALL
+
+! TODO Does not reflect the second ball
+
+*ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,STITCHING
@@ -146,7 +153,9 @@ DSPOPTION,,INCORE
 ! Solve
 ALLSEL,ALL
 /UIS,MSGPOP,3
+KEYW,PR_SGUI,1
 SOLVE
+KEYW,PR_SGUI,0
 /UIS,MSGPOP,0
 
 /COM,---------------------------------------------------------------------------

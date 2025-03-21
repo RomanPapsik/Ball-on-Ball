@@ -35,7 +35,7 @@ ANTYPE,STATIC,NEW
 
 ! Substeps
 AUTOTS,ON
-NSUBST,100,1000,5
+NSUBST,3000,3000,1000
 
 ! Save all nodal data for every substep
 OUTRES,ALL,ALL
@@ -148,25 +148,38 @@ ESEL,S,TYPE,,element_structural
 NSLE,S,CORNER
 NSEL,R,LOC,X,ball_radius_lower,ball_radius_lower
 *GET,selected_nodes_count,NODE,,COUNT
+
 *DEL,node_list,,NOPR
 *VLEN,selected_nodes_count
 *VGET,node_list,NODE,,NLIST
 
 ! Retrieve results for selected nodes
-*DEL,stresses_surface,,NOPR
-*DIM,stresses_surface,ARRAY,selected_nodes_count,5
-RSYS,cs_ball_lower
+*DEL,stresses_surface_lower,,NOPR
+*DIM,stresses_surface_lower,ARRAY,selected_nodes_count,13
 *DO,n,1,selected_nodes_count
 	! Angle of node
-	*GET,stresses_surface(n,1),NODE,node_list(n),LOC,Y
-	! Stresses
-	*GET,stresses_surface(n,2),NODE,node_list(n),S,X
-	*GET,stresses_surface(n,3),NODE,node_list(n),S,Y
-	*GET,stresses_surface(n,4),NODE,node_list(n),S,Z
-	*GET,stresses_surface(n,5),NODE,node_list(n),S,1
+	RSYS,cs_ball_lower
+	*GET,stresses_surface_lower(n,1),NODE,node_list(n),LOC,Y
+	! Stresses in spherical
+	*GET,stresses_surface_lower(n,2),NODE,node_list(n),S,X
+	*GET,stresses_surface_lower(n,3),NODE,node_list(n),S,Y
+	*GET,stresses_surface_lower(n,4),NODE,node_list(n),S,Z
+	! Stresses in cylindrical
+	RSYS,1
+	*GET,stresses_surface_lower(n,5),NODE,node_list(n),S,X
+	*GET,stresses_surface_lower(n,6),NODE,node_list(n),S,Y
+	*GET,stresses_surface_lower(n,7),NODE,node_list(n),S,Z
+	! Principal stresses
+	*GET,stresses_surface_lower(n,8),NODE,node_list(n),S,1
+	*GET,stresses_surface_lower(n,9),NODE,node_list(n),S,2
+	*GET,stresses_surface_lower(n,10),NODE,node_list(n),S,3
+	! Principal strains
+	*GET,stresses_surface_lower(n,11),NODE,node_list(n),S,1
+	*GET,stresses_surface_lower(n,12),NODE,node_list(n),S,2
+	*GET,stresses_surface_lower(n,13),NODE,node_list(n),S,3
 *ENDDO
 ! Sort by angle
-*DEL,void,,NOPR $ *MOPER,void,stresses_surface,SORT,,1
+*DEL,void,,NOPR $ *MOPER,void,stresses_surface_lower,SORT,,1
 
 /COM,---------------------------------------------------------------------------
 /COM,PLOT PATH SURFACE
@@ -179,23 +192,27 @@ ESEL,S,TYPE,,element_structural $ NSLE,S,1
 ! Calculate path division
 *SET,path_division,NINT((contact_arc_length_lower)/(micrometer/4))
 ! Initialize new path
-PATH,path_surface,2,13,path_division
+PATH,path_surface,2,16,path_division
 ! Define path
 CSYS,cs_ball_lower
 PPATH,1,node(ball_radius_lower,0,0),,,,cs_ball_lower
 PPATH,2,node(ball_radius_lower,contact_angle_lower*4,0),,,,cs_ball_lower
 
 ! Map onto path
+PDEF,S1,S,1
+PDEF,S2,S,2
+PDEF,S3,S,3
 RSYS,cs_ball_lower
 PDEF,Snorm,S,X
 PDEF,Stang,S,Y
 PDEF,Shoop,S,Z
-PDEF,S1,S,1
-PDEF,S2,S,2
-PDEF,S3,S,3
 PDEF,Enorm,EPEL,X
 PDEF,Etang,EPEL,Y
 PDEF,Ehoop,EPEL,Z
+RSYS,1
+PDEF,Srad,S,X
+PDEF,Saxi,S,Y
+PDEF,Stan,S,Z
 
 ! Plot paths
 /TITLE,Path on the lower ball surface
@@ -203,7 +220,8 @@ PDEF,Ehoop,EPEL,Z
 /AXLAB,Y,Stress component [MPa]
 ! /XRANGE,contact_radius*0.95,2*contact_radius*1.05
 ! /YRANGE,-stress_maximum*2,+stress_maximum*2
-PLPATH,Stang,Snorm,Shoop
+PLPATH,Stang,Snorm,Shoop,Srad,Saxi,Stan
+
 ! Save current path into an array
 PAGET,path_surface,TABLE
 ALLSEL,ALL
@@ -216,8 +234,6 @@ ALLSEL,ALL
 
 /POST1
 CSYS,cs_ball_lower
-RSYS,cs_ball_lower
-
 ! Select structural elements of the ball
 ESEL,S,TYPE,,element_structural $ NSLE,S,1
 ! Calculate path division
@@ -231,6 +247,7 @@ PPATH,1,node(ball_radius_lower,crack_angle_lower,0)
 PPATH,2,node(ball_radius_lower-path_length,crack_angle_lower,0)
 
 ! Map onto path
+RSYS,cs_ball_lower
 PDEF,Snorm,S,X
 PDEF,Stang,S,Y
 PDEF,Shoop,S,Z

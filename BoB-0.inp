@@ -6,8 +6,8 @@
 /INPUT,BoB-1-setup,inp
 
 ! Configuration files
-/INPUT,BoB-2-configuration-Pasterk,inp
-! /INPUT,BoB-2-configuration-Munz,inp
+! /INPUT,BoB-2-configuration-Pasterk,inp
+/INPUT,BoB-2-configuration-Munz,inp
 
 ! Hertz theory
 /INPUT,BoB-3-Hertz,inp
@@ -28,8 +28,8 @@
 ! Stress in crackless state
 /INPUT,BoB-8-crackless,inp
 
-! Energy evolution with crack growth
-/INPUT,BoB-9-cracked,inp
+! ! Energy evolution with crack growth
+! /INPUT,BoB-9-cracked,inp
 
-! Export of results
-/INPUT,BoB-8-stress-export,inp
+! ! Export of results
+! /INPUT,BoB-8-stress-export,inp

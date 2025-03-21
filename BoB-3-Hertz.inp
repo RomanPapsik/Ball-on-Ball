@@ -15,7 +15,7 @@
 ! Effective curvature
 *SET,effective_curvature,1/ball_radius_lower+1/ball_radius_upper
 
-! Effective radiusVenus from Willendorf
+! Effective radius
 *SET,effective_radius,1/effective_curvature
 
 /COM,---------------------------------------------------------------------------
@@ -27,10 +27,6 @@
 
 ! Contact area
 *SET,contact_area_hertz,PI*(contact_radius_hertz**2)
-
-/COM,---------------------------------------------------------------------------
-/COM,PRESSURES 
-/COM,---------------------------------------------------------------------------
 
 ! Contact half angle from axis
 *AFUN,DEG

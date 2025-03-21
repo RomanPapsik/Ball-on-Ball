@@ -20,14 +20,18 @@ ET,element_target_ball,TARGE169
 ! 2D 3-Node Surface-to-Surface Contact 
 *SET,element_contact_ball,172
 ET,element_contact_ball,CONTA172
+
 ! Contact algorithm
 ! KEYOPT,element_contact_ball,2,0 ! (Augmented Lagrange)
 KEYOPT,element_contact_ball,2,4 ! (Pure Lagrange)
+
 ! Contact detection
 ! KEYOPT,element_contact_ball,4,0 ! (At Gauss points)
 KEYOPT,element_contact_ball,4,2 ! (normal to target)
+
 ! Automated adjustment
 KEYOPT,element_contact_ball,5,1 ! (Auto ICONT)
+
 ! Ininital gap condideration
 KEYOPT,element_contact_ball,9,1 ! (Excluding)
 
@@ -72,28 +76,28 @@ KEYOPT,element_contact_ball,9,1 ! (Excluding)
 	*SET,pair_balls_21,21
 
 	! Target elements upper ball
-	CMSEL,S,contact_area_upper
+	CMSEL,S,line_contact_upper
 	NSLL,S,1
 	REAL,pair_balls_12
 	TYPE,element_target_ball
 	ESURF
 
 	! Contact elements lower ball
-	CMSEL,S,contact_area_lower
+	CMSEL,S,line_contact_lower
 	NSLL,S,1
 	REAL,pair_balls_12
 	TYPE,element_contact_ball
 	ESURF
 
 	! Target elements lower ball
-	CMSEL,S,contact_area_lower
+	CMSEL,S,line_contact_lower
 	NSLL,S,1
 	REAL,pair_balls_21
 	TYPE,element_target_ball
 	ESURF
 
 	! Contact elements upper ball
-	CMSEL,S,contact_area_upper
+	CMSEL,S,line_contact_upper
 	NSLL,S,1
 	REAL,pair_balls_21
 	TYPE,element_contact_ball
@@ -114,7 +118,6 @@ KEYOPT,element_contact_ball,9,1 ! (Excluding)
 
 *ENDIF
 
-
 /COM,---------------------------------------------------------------------------
 /COM,CONTACT ELEMENTS FOR CRACKS
 /COM,---------------------------------------------------------------------------
@@ -129,14 +132,18 @@ ET,element_target_crack,TARGE169
 ! 2D 3-Node Surface-to-Surface Contact
 *SET,element_contact_crack,173
 ET,element_contact_crack,CONTA172
+
 ! Contact algorithm
 ! KEYOPT,element_contact_crack,2,0 ! (Augmented Lagrange)
 KEYOPT,element_contact_crack,2,4 ! (Pure Lagrange)
+
 ! Contact detection
 ! KEYOPT,element_contact_crack,4,0 ! (At Gauss points)
 KEYOPT,element_contact_crack,4,2 ! (normal to target)
+
 ! Automated adjustment
 KEYOPT,element_contact_crack,5,0 ! (No adjustment)
+
 ! Ininital gap condideration
 KEYOPT,element_contact_crack,9,1 ! (Excluding)
 

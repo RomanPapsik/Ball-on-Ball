@@ -40,12 +40,12 @@ FINISH
 /COM,---------------------------------------------------------------------------
 
 ! Length
-*SET,micrometer,1E-3
-*SET,millimeter,1
-*SET,meter,1E3
+*SET,micrometer,1
+*SET,millimeter,1E3
+*SET,meter,1E6
 
 ! Force
-*SET,newton,1
+*SET,newton,1E6
 
 ! Pressure
 *SET,megapascal,1
@@ -88,6 +88,10 @@ SELTOL,micrometer/1000
 *SET,undefined,-1
 
 ! Check command line
+*GET,status_BB,PARM,BB,TYPE
+*GET,status_LD,PARM,LD,TYPE
+*GET,status_SC,PARM,SC,TYPE
+*GET,status_DC,PARM,DC,TYPE
 *GET,status_Fc,PARM,Fc,TYPE
 *GET,status_RbL,PARM,RbL,TYPE
 *GET,status_RbU,PARM,RbU,TYPE
@@ -110,5 +114,5 @@ SELTOL,micrometer/1000
 *ABBR,'BC',/INPUT,BoB-4-BCs,inp
 *ABBR,'CRACKLESS',/INPUT,BoB-8-stress,inp
 *ABBR,'STRESS_JSON',/INPUT,BoB-8-stress-export,inp
-*ABBR,'CRACKED',/INPUT,BoB-9-energy,inp
-! *ABBR,'ENERGY_EXP',/INPUT,ball-on-ball-9-energy-export,inp
+*ABBR,'CRACKED',/INPUT,BoB-9-cracked,inp
+*ABBR,'ENERGY_JSON',/INPUT,BoB-9-energy-export,inp

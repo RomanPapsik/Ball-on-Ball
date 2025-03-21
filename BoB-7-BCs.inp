@@ -4,14 +4,14 @@
 
 /PREP7
 
-! Lower ball coupling
+! Lower ball coupling of displacement
 CSYS,cs_ball_lower
 NSEL,S,LOC,Y,90,90
 NSEL,A,LOC,X,0,0
 CP,NEXT,UY,ALL
 NSEL,ALL
 
-! Upper ball coupling
+! Upper ball coupling of displacement
 *IF,simulate_two_balls,EQ,true,THEN
 	CSYS,cs_ball_upper
 	NSEL,S,LOC,Y,90,90
@@ -20,8 +20,8 @@ NSEL,ALL
 	NSEL,ALL
 *ENDIF
 
-! Displacement
-*IF,initial_gap,LE,0,THEN
+! Fix displacement on the symmetry line
+*IF,initial_gap,EQ,0,THEN
 	CSYS,0
 	ESEL,S,TYPE,,element_structural
 	NSLE,S
@@ -31,25 +31,27 @@ NSEL,ALL
 	ALLSEL,ALL
 *ENDIF
 
-! Lower force
+! Force on the lower ball
 CSYS,cs_ball_lower
+! KSEL,S,KP,,100 $ NSLK,S
 *SET,loaded_node_lower,NODE(0,0,0)
-CSYS,0
 F,loaded_node_lower,FY,force
 
-! Upper force
+! Force on the upper ball
 *IF,simulate_two_balls,EQ,true,THEN
 	CSYS,cs_ball_upper
 	*SET,loaded_node_upper,NODE(0,0,0)
-	CSYS,0
-	F,loaded_node_upper,FY,-force ! TODO orientation
+	F,loaded_node_upper,FY,-force
 *ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,SAVE CRACKED MODEL
 /COM,---------------------------------------------------------------------------
 
+ALLSEL,ALL
 FINISH
 
-! Save cracked model
-SAVE,'cracked','tmp',,MODEL
+*IF,simulate_cracks,EQ,true,THEN
+	! Save cracked model
+	SAVE,'cracked','tmp',,MODEL
+*ENDIF

@@ -44,12 +44,12 @@
 /COM,FORCE MAGNITUDE
 /COM,---------------------------------------------------------------------------
 
-*IF,Fc,LE,1E-18,THEN
-	! Take default value
-	*SET,force,5874*newton
-*ELSE
+*IF,status_Fc,EQ,defined,THEN
 	! Take command line value
 	*SET,force,Fc*newton
+*ELSE
+	! Take default value
+	*SET,force,5874*newton
 *ENDIF
 
 /COM,---------------------------------------------------------------------------
@@ -99,7 +99,7 @@
 		! Take command line value
 		*SET,crack_multiplier_upper,RaRcU
 	*ELSE
-		*SET,crack_multiplier_upper,1.2
+		*SET,crack_multiplier_upper,crack_multiplier_lower
 *ENDIF
 
 ! Crack angle declination from the surface

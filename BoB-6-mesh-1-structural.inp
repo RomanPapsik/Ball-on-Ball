@@ -19,21 +19,31 @@ KEYOPT,element_structural,3,1
 /COM,SIZING
 /COM,---------------------------------------------------------------------------
 
-! General
-LSEL,ALL
-LESIZE,ALL,,,20,,1
-
 ! Vicinity of contact
-ASEL,S,AREA,,1,4
-*IF,simulate_two_balls,EQ,true,THEN
-	ASEL,A,AREA,,9,12
-*ENDIF
-LSLA,S
-LESIZE,ALL,,,10,,1
-ALLSEL,ALL
+KSEL,S,KP,,111,113 $ KSEL,A,KP,,211,213 $ LSLK,S,1
+KSEL,S,KP,,121,123 $ KSEL,A,KP,,221,223 $ LSLK,A,1
+KSEL,S,KP,,131,133 $ KSEL,A,KP,,231,233 $ LSLK,A,1
+LESIZE,ALL,,,100,,1
 
-*SET,element_size_lower,crack_arc_length_lower/10
-*SET,element_size_upper,crack_arc_length_upper/10
+KSEL,S,KP,,111,132,10 $ KSEL,A,KP,,211,231,10 $ LSLK,S,1
+KSEL,S,KP,,112,132,10 $ KSEL,A,KP,,212,232,10 $ LSLK,A,1
+KSEL,S,KP,,113,133,10 $ KSEL,A,KP,,213,233,10 $ LSLK,A,1
+LESIZE,ALL,,,50,,1
+
+KSEL,S,KP,,113,133,10 $ KSEL,A,KP,,131,133,1
+KESIZE,ALL,contact_arc_length_lower/100
+KSEL,S,KP,,213,233,10 $ KSEL,A,KP,,231,233,1
+KESIZE,ALL,contact_arc_length_upper/100
+
+KSEL,S,KP,,141 $ KSEL,A,KP,,143 $ KSEL,A,KP,,144
+KESIZE,ALL,ball_radius_lower/40
+KSEL,S,KP,,100 $ KSEL,A,KP,,102 $ KSEL,A,KP,,142
+KESIZE,ALL,ball_radius_upper/20
+
+KSEL,S,KP,,241 $ KSEL,A,KP,,243 $ KSEL,A,KP,,244
+KESIZE,ALL,ball_radius_upper/40
+KSEL,S,KP,,200 $ KSEL,A,KP,,202 $ KSEL,A,KP,,242
+KESIZE,ALL,ball_radius_upper/20
 
 /COM,---------------------------------------------------------------------------
 /COM,MESHING
@@ -41,21 +51,24 @@ ALLSEL,ALL
 
 TYPE,element_structural
 MSHAPE,hexahedral_mesh,2D
-MSHKEY,mapped_mesh
 
 ! Upper ball
 MAT,material_lower
+MSHKEY,mapped_mesh
 AMESH,1,4
+MSHKEY,free_mesh
 AMESH,5,6
 AMESH,7,8
 
 *IF,simulate_two_balls,EQ,true,THEN
 
-	! Lower ball
-	MAT,material_upper
-	AMESH,9,12
-	AMESH,13,14
-	AMESH,15,16
+! Lower ball
+MAT,material_upper
+MSHKEY,mapped_mesh
+AMESH,9,12
+MSHKEY,free_mesh
+AMESH,13,14
+AMESH,15,16
 
 *ENDIF
 
@@ -63,127 +76,114 @@ AMESH,7,8
 /COM,REFINEMENT
 /COM,---------------------------------------------------------------------------
 
-! First refinement
-CMSEL,S,area_ball_lower
-ESLA,S
-CSYS,cs_ball_lower
-ESEL,R,CENT,X,ball_radius_lower-contact_arc_length_lower*0.5,ball_radius_lower
-ESEL,R,CENT,Y,crack_angle_lower*0.4,crack_angle_lower*1.7
-EREFINE,ALL,,,3,0,OFF,ON
+! ! First refinement
+! CMSEL,S,area_ball_lower,AREA
+! ESLA,S
+! CSYS,cs_ball_lower
+! ESEL,R,CENT,X,ball_radius_lower-contact_arc_length_lower*0,ball_radius_lower
+! ESEL,R,CENT,Y,crack_angle_lower*0.4,crack_angle_lower*1.7
+! EREFINE,ALL,,,3,0,OFF,ON
 
-*IF,simulate_two_balls,EQ,true,THEN
-	CMSEL,S,area_ball_upper
-	ESLA,S
-	CSYS,cs_ball_upper
-	ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.5,ball_radius_upper
-	ESEL,R,CENT,Y,crack_angle_upper*0.4,crack_angle_upper*1.7
-	EREFINE,ALL,,,3,0,OFF,ON
-*ENDIF
+! *IF,simulate_two_balls,EQ,true,THEN
 
-! Second refinement
-CMSEL,S,area_ball_lower
-ESLA,S
-CSYS,cs_ball_lower
-ESEL,R,CENT,X,ball_radius_lower-contact_arc_length_lower*0.3,ball_radius_lower
-ESEL,R,CENT,Y,crack_angle_lower*0.6,crack_angle_lower*1.5
-EREFINE,ALL,,,3,0,OFF,ON
+! CMSEL,S,area_ball_upper,AREA
+! ESLA,S
+! CSYS,cs_ball_upper
+! ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0,ball_radius_upper
+! ESEL,R,CENT,Y,crack_angle_upper*0.4,crack_angle_upper*1.7
+! EREFINE,ALL,,,3,0,OFF,ON
 
-*IF,simulate_two_balls,EQ,true,THEN
+! *ENDIF
 
-CMSEL,S,area_ball_upper
-CSYS,cs_ball_upper
-ESEL,S,CENT,Y,crack_angle_upper*0.6,crack_angle_upper*1.5
-ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.3,ball_radius_upper
-ESLA,R
-EREFINE,ALL,,,3,0,OFF,ON
+! /COM,---------------------------------------------------------------------------
 
-*ENDIF
+! ! Second refinement
+! CMSEL,S,area_ball_lower,AREA
+! ESLA,S
+! CSYS,cs_ball_lower
+! ESEL,R,CENT,Y,crack_angle_lower*0.6,crack_angle_lower*1.5
+! ESEL,R,CENT,X,ball_radius_lower-contact_arc_length_lower*0.3,ball_radius_lower
+! EREFINE,ALL,,,3,0,OFF,ON
 
-! Third refinement
-CMSEL,S,area_ball_lower
-CSYS,cs_ball_lower
-ESEL,S,CENT,Y,contact_angle_lower*0.8,crack_angle_lower*1.2
-ESEL,R,CENT,X,ball_radius_lower-contact_arc_length_lower*0.18,ball_radius_lower
-ESLA,R
-EREFINE,ALL,,,3,0,OFF,ON
+! *IF,simulate_two_balls,EQ,true,THEN
 
-*IF,simulate_two_balls,EQ,true,THEN
+! CMSEL,S,area_ball_upper,AREA
+! ESLA,S
+! CSYS,cs_ball_upper
+! ESEL,R,CENT,Y,crack_angle_upper*0.6,crack_angle_upper*1.5
+! ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.3,ball_radius_upper
+! EREFINE,ALL,,,3,0,OFF,ON
 
-CMSEL,S,area_ball_upper
-CSYS,cs_ball_upper
-ESEL,S,CENT,Y,contact_angle_upper*0.8,crack_angle_upper*1.2
-ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.18,ball_radius_upper
-ESLA,R
-EREFINE,ALL,,,3,0,OFF,ON
+! *ENDIF
 
-*ENDIF
+! /COM,---------------------------------------------------------------------------
 
-! Fourth refinement
-CMSEL,S,area_ball_lower
-CSYS,cs_ball_lower
-ESEL,S,CENT,Y,contact_angle_lower*0.97,crack_angle_lower*1.1
-ESEL,R,CENT,X,ball_radius_lower-contact_arc_length_lower*0.07,ball_radius_lower
-ESLA,R
-EREFINE,ALL,,,3,0,OFF,ON
+! ! Third refinement
+! CMSEL,S,area_ball_lower
+! CSYS,cs_ball_lower
+! ESEL,S,CENT,Y,contact_angle_lower*0.8,crack_angle_lower*1.2
+! ESEL,R,CENT,X,ball_radius_lower-contact_arc_length_lower*0.18,ball_radius_lower
+! ESLA,R
+! EREFINE,ALL,,,3,0,OFF,ON
 
-*IF,simulate_two_balls,EQ,true,THEN
+! *IF,simulate_two_balls,EQ,true,THEN
 
-CMSEL,S,ball_upper
-CSYS,cs_ball_upper
-ESEL,S,CENT,Y,contact_angle_upper*0.97,crack_angle_upper*1.1
-ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.07,ball_radius_upper
-ESLA,R
-EREFINE,ALL,,,3,0,OFF,ON
+! CMSEL,S,area_ball_upper
+! CSYS,cs_ball_upper
+! ESEL,S,CENT,Y,contact_angle_upper*0.8,crack_angle_upper*1.2
+! ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.18,ball_radius_upper
+! ESLA,R
+! EREFINE,ALL,,,3,0,OFF,ON
 
-*ENDIF
+! *ENDIF
 
-! Fifth refinement
-CMSEL,S,area_ball_lower
-CSYS,cs_ball_lower
-NSEL,S,LOC,Y,contact_angle_lower,contact_angle_lower*1.05
-NSEL,R,LOC,X,ball_radius_lower-contact_arc_length_lower*0.01,ball_radius_lower
-NSEL,A,LOC,Y,crack_angle_lower*0.99,crack_angle_lower*1.01
-NSEL,R,LOC,X,ball_radius_lower-contact_arc_length_lower*0.05,ball_radius_lower
-ESLN,S,1,ALL
-EREFINE,ALL,,,3,0,OFF,ON
+/COM,---------------------------------------------------------------------------
 
-*IF,simulate_two_balls,EQ,true,THEN
+! ! Fourth refinement
+! CMSEL,S,area_ball_lower
+! CSYS,cs_ball_lower
+! ESEL,S,CENT,Y,contact_angle_lower*0.97,crack_angle_lower*1.1
+! ESEL,R,CENT,X,ball_radius_lower-contact_arc_length_lower*0.07,ball_radius_lower
+! ESLA,R
+! EREFINE,ALL,,,3,0,OFF,ON
 
-CMSEL,S,ball_upper
-CSYS,cs_ball_upper
-NSEL,S,LOC,Y,contact_angle_upper,contact_angle_upper*1.05
-NSEL,R,LOC,X,ball_radius_upper-contact_arc_length_upper*0.01,ball_radius_upper
-NSEL,A,LOC,Y,crack_angle_upper*0.99,crack_angle_upper*1.01
-NSEL,R,LOC,X,ball_radius_upper-contact_arc_length_upper*0.05,ball_radius_upper
-ESLN,S,1,ALL
-EREFINE,ALL,,,3,0,OFF,ON
+! *IF,simulate_two_balls,EQ,true,THEN
 
-*ENDIF
+! 	CMSEL,S,area_ball_upper
+! 	CSYS,cs_ball_upper
+! 	ESEL,S,CENT,Y,contact_angle_upper*0.97,crack_angle_upper*1.1
+! 	ESEL,R,CENT,X,ball_radius_upper-contact_arc_length_upper*0.07,ball_radius_upper
+! 	ESLA,R
+! 	EREFINE,ALL,,,3,0,OFF,ON
 
-*IF,simulate_cracks,EQ,true,THEN
+! *ENDIF
 
-	! Sixth refinement
-	CMSEL,S,line_crack_lower_inner
-	CMSEL,A,line_crack_lower_outer
-	NSLL,S,1
-	ESLN,S,0,ALL
-	CSYS,cs_ball_lower
-	ESEL,R,CENT,X,ball_radius_lower-10*micrometer,ball_radius_lower
-	EREFINE,ALL,,,3,2,OFF,ON
+/COM,---------------------------------------------------------------------------
 
-	*IF,simulate_two_balls,EQ,true,THEN
+! ! Fifth refinement
+! CMSEL,S,area_ball_lower
+! CSYS,cs_ball_lower
+! NSEL,S,LOC,Y,contact_angle_lower,contact_angle_lower*1.05
+! NSEL,R,LOC,X,ball_radius_lower-contact_arc_length_lower*0.01,ball_radius_lower
+! NSEL,A,LOC,Y,crack_angle_lower*0.99,crack_angle_lower*1.01
+! NSEL,R,LOC,X,ball_radius_lower-contact_arc_length_lower*0.05,ball_radius_lower
+! ESLN,S,1,ALL
+! EREFINE,ALL,,,3,0,OFF,ON
 
-		CMSEL,S,line_crack_upper_inner
-		CMSEL,A,line_crack_upper_outer
-		NSLL,S,1
-		ESLN,S,0,ALL
-		CSYS,cs_ball_upper
-		ESEL,R,CENT,X,ball_radius_upper-10*micrometer,ball_radius_upper
-		EREFINE,ALL,,,3,2,OFF,ON
+! *IF,simulate_two_balls,EQ,true,THEN
 
-*ENDIF
+! CMSEL,S,area_ball_upper
+! CSYS,cs_ball_upper
+! NSEL,S,LOC,Y,contact_angle_upper,contact_angle_upper*1.05
+! NSEL,R,LOC,X,ball_radius_upper-contact_arc_length_upper*0.01,ball_radius_upper
+! NSEL,A,LOC,Y,crack_angle_upper*0.99,crack_angle_upper*1.01
+! NSEL,R,LOC,X,ball_radius_upper-contact_arc_length_upper*0.05,ball_radius_upper
+! ESLN,S,1,ALL
+! EREFINE,ALL,,,3,0,OFF,ON
 
-*ENDIF
+! *ENDIF
+
+/COM,---------------------------------------------------------------------------
 
 ! Select everything
 ALLSEL,ALL
@@ -192,20 +192,16 @@ ALLSEL,ALL
 /COM,TOLERANCES
 /COM,---------------------------------------------------------------------------
 
-! Small element size
-*SET,resized_element_size_lower,element_size_lower/(3**6)
-*SET,resized_element_size_upper,element_size_upper/(3**6)
+! ! Small element size
+! *SET,resized_element_size_lower,element_size_lower/(3**6)
+! *SET,resized_element_size_upper,element_size_upper/(3**6)
 
-! Precision for stitching
-*SET,stitching_precision_lower,resized_element_size_lower/3
-*SET,stitching_precision_upper,resized_element_size_upper/3
-
-! Tolerance for selections
-*IF,simulate_two_balls,EQ,false,THEN
-	SELTOL,stitching_precision_lower
-*ELSE
-	SELTOL,MIN(stitching_precision_lower,stitching_precision_upper)
-*ENDIF
+! ! Tolerance for selections
+! *IF,simulate_two_balls,EQ,false,THEN
+! 	SELTOL,stitching_precision_lower
+! *ELSE
+! 	SELTOL,MIN(stitching_precision_lower,stitching_precision_upper)
+! *ENDIF
 
 /COM,---------------------------------------------------------------------------
 /COM,STATISTICS
