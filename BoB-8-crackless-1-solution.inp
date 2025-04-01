@@ -37,7 +37,7 @@ ANTYPE,STATIC,NEW
 AUTOTS,ON
 NSUBST,3000,3000,1000
 
-! Save all nodal data for every substep
+! Save all results in every substep
 OUTRES,ALL,ALL
 
 ! Direct sparse solver
@@ -58,3 +58,5 @@ ALLSEL,ALL
 /UIS,MSGPOP,3
 SOLVE
 /UIS,MSGPOP,0
+
+SAVE,converged,db,,ALL
