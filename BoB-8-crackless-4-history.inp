@@ -1,0 +1,63 @@
+/COM,===========================================================================
+/COM,MODEL WITHOUT A CRACK SOLUTION
+/COM,===========================================================================
+
+/POST1
+
+/COM,---------------------------------------------------------------------------
+/COM,PREPARE COMPONENTS
+/COM,---------------------------------------------------------------------------
+
+! Lower ball nodes
+CMSEL,S,area_ball_lower,AREA
+ESLA,S $ ESEL,R,TYPE,,element_structural
+NSLE,S $ CM,nodes_ball_lower,NODE
+*VGET,ball_lower_mask,NODE,,NSEL
+
+! Lower ball coordinates
+CSYS,cs_ball_lower
+*VMASK,ball_lower_mask $ *VGET,ball_lower_radius,NODE,,LOC,X
+*VMASK,ball_lower_mask $ *VGET,ball_lower_angle,NODE,,LOC,Y
+
+! Upper ball nodes
+CMSEL,S,area_ball_upper,AREA
+ESLA,S $ ESEL,R,TYPE,,element_structural
+NSLE,S $ CM,nodes_ball_upper,NODE
+*VGET,ball_upper_mask,NODE,,NSEL
+
+! Upper ball coordinates
+CSYS,cs_ball_upper
+*VMASK,ball_upper_mask $ *VGET,ball_upper_radius,NODE,,LOC,X
+*VMASK,ball_upper_mask $ *VGET,ball_upper_angle,NODE,,LOC,Y
+
+! Re-select everything
+ALLSEL,ALL
+
+/COM,---------------------------------------------------------------------------
+/COM,RETRIVE STRESSES
+/COM,---------------------------------------------------------------------------
+
+! Number of substeps
+*GET,count_substeps,ACTIVE,0,SOLU,NCMSS
+
+! Loop over substeps
+*DO,substep,1,count_substeps
+
+	! Increment substep
+	SET,1,substep
+
+	! Retrieve tangential stress
+	RSYS,cs_ball_lower $ *VGET,stress_lower,NODE,,S,Y
+	RSYS,cs_ball_upper $ *VGET,stress_upper,NODE,,S,Y
+
+	*IF,substep,EQ,1,THEN
+		! Create the envelope
+		*VFUN,stress_lower_envelope,COPY,stress_lower
+		*VFUN,stress_upper_envelope,COPY,stress_upper
+	*ELSE
+		! Update the envelope
+		*VOPER,stress_lower_envelope,stress_lower_envelope,MAX,stress_lower
+		*VOPER,stress_upper_envelope,stress_upper_envelope,MAX,stress_upper
+	*ENDIF
+
+*ENDDO
