@@ -43,15 +43,3 @@ F,loaded_node_lower,FY,force
 	*SET,loaded_node_upper,NODE(0,0,0)
 	F,loaded_node_upper,FY,-force
 *ENDIF
-
-/COM,---------------------------------------------------------------------------
-/COM,SAVE CRACKED MODEL
-/COM,---------------------------------------------------------------------------
-
-ALLSEL,ALL
-FINISH
-
-*IF,simulate_cracks,EQ,true,THEN
-	! Save cracked model
-	SAVE,'cracked','tmp',,MODEL
-*ENDIF
