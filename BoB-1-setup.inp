@@ -46,6 +46,7 @@ FINISH
 
 ! Force
 *SET,newton,1E6
+*SET,kilonewton,1E9
 
 ! Pressure
 *SET,megapascal,1
