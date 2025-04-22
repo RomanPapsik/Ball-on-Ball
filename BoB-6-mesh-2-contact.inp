@@ -22,18 +22,32 @@ ET,element_target_ball,TARGE169
 ET,element_contact_ball,CONTA172
 
 ! Contact algorithm
-! KEYOPT,element_contact_ball,2,0 ! (Augmented Lagrange)
-KEYOPT,element_contact_ball,2,4 ! (Pure Lagrange)
+*SET,augmented_Lagrange,0
+*SET,penalty,1
+*SET,pure_Lagrange,4
+KEYOPT,element_contact_ball,2,pure_Lagrange
 
 ! Contact detection
-! KEYOPT,element_contact_ball,4,0 ! (At Gauss points)
-KEYOPT,element_contact_ball,4,2 ! (normal to target)
+*SET,on_gauss_point,0
+*SET,on_nodes_normal_from_contact,1
+*SET,on_nodes_normal_to_target,2
+KEYOPT,element_contact_ball,4,on_nodes_normal_from_contact
 
 ! Automated adjustment
-KEYOPT,element_contact_ball,5,1 ! (Auto ICONT)
+*SET,no_adjustment,0
+*SET,close_gap_CNOF,1
+*SET,auto_ICONT,4
+KEYOPT,element_contact_ball,5,no_adjustment
 
-! Ininital gap condideration
-KEYOPT,element_contact_ball,9,1 ! (Excluding)
+! Contact behaviour
+*SET,frictionless,0
+*SET,rough,1
+KEYOPT,element_contact_ball,12,frictionless
+
+! Inital gap condideration
+*SET,include_gap
+*SET,exclude_gap
+KEYOPT,element_contact_ball,9,exclude_gap
 
 /COM,---------------------------------------------------------------------------
 /COM,BALL TO BALL CONTACT
@@ -48,7 +62,7 @@ KEYOPT,element_contact_ball,9,1 ! (Excluding)
 	! Rigid line target elements
 	KSEL,S,KP,,98,99
 	LSLK,S,1
-	LESIZE,ALL,,,20,,1
+	LESIZE,ALL,,,600,,1
 	REAL,pair_ball_line
 	TYPE,element_target_ball
 	LMESH,ALL
@@ -63,8 +77,10 @@ KEYOPT,element_contact_ball,9,1 ! (Excluding)
 
 	! Target circle radius
 	RMODIF,pair_ball_line,1,0
+
 	! Initial closure (ICONT)
-	RMODIF,pair_ball_line,5,contact_sagitta_lower
+	! RMODIF,pair_ball_line,5,contact_sagitta_lower
+	
 	! Pinball region (PINB)
 	RMODIF,pair_ball_line,6,-contact_sagitta_lower*1.5
 
@@ -109,9 +125,7 @@ KEYOPT,element_contact_ball,9,1 ! (Excluding)
 	! Target circle radius
 	RMODIF,pair_balls_12,1,ball_radius_upper
 	RMODIF,pair_balls_21,1,ball_radius_lower
-	! Initial closure (ICONT)
-	RMODIF,pair_balls_12,5,contact_sagitta_lower+contact_sagitta_upper+initial_gap/2
-	RMODIF,pair_balls_21,5,contact_sagitta_lower+contact_sagitta_upper+initial_gap/2
+	
 	! Pinball region (PINB)
 	RMODIF,pair_balls_12,6,-(contact_sagitta_lower+contact_sagitta_upper)*1.2
 	RMODIF,pair_balls_21,6,-(contact_sagitta_lower+contact_sagitta_upper)*1.2
