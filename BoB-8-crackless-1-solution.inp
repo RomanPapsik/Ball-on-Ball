@@ -38,7 +38,7 @@ ANTYPE,STATIC,NEW
 
 ! Substeps
 AUTOTS,ON
-NSUBST,5000,5000,500
+NSUBST,10000,10000,100
 
 ! Save all results in every substep
 OUTRES,ALL,ALL
@@ -60,10 +60,37 @@ ALLSEL,ALL
 SOLVE
 /UIS,MSGPOP,0
 
+/COM,---------------------------------------------------------------------------
+/COM,CREATE FILE NAME
+/COM,---------------------------------------------------------------------------
+
+! Create a file name
+*DEL,filename,,NOPR
+*DIM,filename,STRING,128
+*SET,token_Rb,'-RbL-%CHRVAL(ball_radius_lower/millimeter)%mm-RbU-%CHRVAL(ball_radius_upper/millimeter)%mm'
+*SET,token_F ,'-F-%CHRVAL(force/kilonewton)%kN'
+*SET,token_BB,'-BB-%CHRVAL(simulate_two_balls)%'
+*SET,token_LD,'-LD-%CHRVAL(large_deformations)%'
+*SET,token_DC,'-DC-%CHRVAL(displacement_controlled)%'
+*SET,token_SC,'-SC-%CHRVAL(simulate_cracks)%'
+*IF,simulate_cracks,EQ,true,THEN
+	*SET,token_Ra,'-RaL-%CHRVAL(crack_radius_lower/micrometer)%um-RaU-%CHRVAL(crack_radius_upper/micrometer)%um'
+*ELSE
+	*SET,token_Ra,''
+*ENDIF
+*SET,filename(1),'Result%token_Rb%%token_F%%token_BB%%token_LD%%token_DC%%token_SC%%token_Ra%'
+/TITLE,filename
+
+/COM,---------------------------------------------------------------------------
+/COM,ARCHIVE
+/COM,---------------------------------------------------------------------------
+
 ! Convergence status
 *SET,converged,1
 *GET,covergence_status,ACTIVE,,SOLU,CNVG
+
 ! Save if convergence was achieved
 *IF,covergence_status,EQ,converged,THEN
-	SAVE,converged,db,,ALL
+	SAVE,filename(1),db,,ALL
+	/COPY,,rst,,filename(1),rst
 *ENDIF
