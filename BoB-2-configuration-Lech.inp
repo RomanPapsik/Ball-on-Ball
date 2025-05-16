@@ -50,7 +50,7 @@
 *ELSE
 	! Take default value
 	! *SET,force,71588.4*newton ! Results in 2 GPa
-	*SET,force,3000*newton
+	*SET,force,1950*newton
 *ENDIF
 
 /COM,---------------------------------------------------------------------------

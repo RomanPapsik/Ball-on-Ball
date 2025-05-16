@@ -2,12 +2,72 @@
 /COM,MODEL WITHOUT A CRACK SOLUTION
 /COM,===========================================================================
 
+RESUME,,db
+
+! Number of substeps
+! /POST1
+! SET,1,LAST
+! *GET,count_substeps,ACTIVE,0,SOLU,NCMSS
+! *DO,substep,1,count_substeps
+! 	SET,1,substep
+! 	plesol,s,1
+! *ENDDO
+
 /POST1
 
-*SET,retrieve_displacement,false
-*SET,retrieve_energy,false
-*SET,retrieve_surface_stress,true
-*SET,retrieve_field_stress,false
+/EXPAND,1,RECT,HALF,1e-18,,,1,RECT,HALF,,1e-18,, ,RECT,FULL,,,, 
+
+/EXPAND,1,RECT,HALF,1e-18,,,
+
+ESEL,S,TYPE,,element_structural
+NSLE,S
+
+*GO,:ende
+/GRAPHICS,POWER
+/TRIAD,OFF        ! Global coordinates
+/PLOPTS,TITLE,OFF ! Title at the bottom
+/PLOPTS,FRAME,OFF ! Frame
+/PLOPTS,MINM,OFF  ! Minimum and maximum
+/PLOPTS,LOGO,OFF  ! Logo
+/PLOPTS,WP,OFF    ! Workplane triad
+/PLOPTS,DATE,OFF  ! No date and time
+/PLOPTS,LEG1,on
+/PLOPTS,LEG2,ON
+/PLOPTS,LEG3,ON
+/PLOPTS,INFO,ON
+
+*SET,retrieve_displacement,true
+*SET,retrieve_energy,true
+*SET,retrieve_surface_stress,false
+*SET,retrieve_field_stress,true
+
+
+
+!--------------------------------
+
+! Make background white
+/RGB,INDEX,100,100,100,0
+! Make lines black
+/RGB,INDEX,0,0,0,15
+ 
+! Change output to file
+/SHOW,PNG
+! Set highest compression level
+PNGR,COMP,ON,9
+! Set pixel resolution
+/GFILE,2400
+! Replot to file
+/REPLOT
+! Close file
+/SHOW,CLOSE
+
+! Make background black
+/RGB,INDEX,0,0,0,0
+! Make lines white
+/RGB,INDEX,100,100,100,15
+
+! Replot if necessary
+/REPLOT
 
 /COM,---------------------------------------------------------------------------
 /COM,DISPLACEMENT
@@ -133,7 +193,7 @@ NSORT,S,Y
 NSEL,ALL
 ! Change range of plotted values
 *SET,absolute_maximum,MAX(ABS(minimal_stress),ABS(maximal_stress))
-/CONTOUR,ALL,10,-absolute_maximum,,absolute_maximum
+/CONTOUR,ALL,127,-absolute_maximum,,absolute_maximum
 ! Plot stress field
 PLESOL,S,Y
 
@@ -148,35 +208,40 @@ ESEL,S,TYPE,,element_structural $ NSLE,S,1
 ! Calculate path division
 *SET,path_division,NINT((contact_arc_length_lower)/(micrometer/10))
 ! Initialize new path
-PATH,path_surface,2,16,path_division
+PATH,path_surface,2,4+15,path_division
 ! Define path
 CSYS,cs_ball_lower
 PPATH,1,node(ball_radius_lower,0,0),,,,cs_ball_lower
 PPATH,2,node(ball_radius_lower,90,0),,,,cs_ball_lower
 
-! Map onto path
-PDEF,S1,S,1
-PDEF,S2,S,2
-PDEF,S3,S,3
 RSYS,cs_ball_lower
 PDEF,Snorm,S,X
 PDEF,Stang,S,Y
 PDEF,Shoop,S,Z
-PDEF,Enorm,EPEL,X
-PDEF,Etang,EPEL,Y
-PDEF,Ehoop,EPEL,Z
+
 RSYS,1
 PDEF,Srad,S,X
 PDEF,Saxi,S,Y
 PDEF,Stan,S,Z
+
+! Map onto path
+PDEF,S1,S,1
+PDEF,S2,S,2
+PDEF,S3,S,3
+
+RSYS,cs_ball_lower
+PDEF,Enorm,EPEL,X
+PDEF,Etang,EPEL,Y
+PDEF,Ehoop,EPEL,Z
 
 ! Plot paths
 /TITLE,Path on the lower ball surface
 /AXLAB,X,Surface path [um]
 /AXLAB,Y,Stress component [MPa]
 ! /XRANGE,contact_radius*0.95,2*contact_radius*1.05
-! /YRANGE,-stress_maximum*2,+stress_maximum*2
+! /YRANGE,-maximum_stress_hertz_lower*0.1,+maximum_stress_hertz_lower*0.1
 PLPATH,Stang,Snorm,Shoop,Srad,Saxi,Stan
+
 
 ! Save current path into an array
 PAGET,path_surface,TABLE
@@ -190,25 +255,18 @@ ALLSEL,ALL
 ! Select structural elements of the ball
 ESEL,S,TYPE,,element_structural $ NSLE,S,1
 ! Calculate path division
-*SET,path_division,NINT((contact_arc_length_upper)/(micrometer/10))
+*SET,path_division,NINT((contact_arc_length_upper)/(micrometer/2))
 ! Initialize new path
 PATH,path_surface,2,16,path_division
 ! Define path
 CSYS,cs_ball_upper
 PPATH,1,node(ball_radius_upper,0,0),,,,cs_ball_upper
-PPATH,2,node(ball_radius_upper,90,0),,,,cs_ball_upper
+PPATH,2,node(ball_radius_upper,contact_angle_upper*4,0),,,,cs_ball_upper
 
 ! Map onto path
-RSYS,0
 PDEF,S1,S,1
 PDEF,S2,S,2
 PDEF,S3,S,3
-
-RSYS,1
-PDEF,Srad,S,X
-PDEF,Saxi,S,Y
-PDEF,Stan,S,Z
-
 RSYS,cs_ball_upper
 PDEF,Snorm,S,X
 PDEF,Stang,S,Y
@@ -216,6 +274,10 @@ PDEF,Shoop,S,Z
 PDEF,Enorm,EPEL,X
 PDEF,Etang,EPEL,Y
 PDEF,Ehoop,EPEL,Z
+RSYS,1
+PDEF,Srad,S,X
+PDEF,Saxi,S,Y
+PDEF,Stan,S,Z
 
 ! Plot paths
 /TITLE,Path on the lower ball surface
@@ -224,10 +286,6 @@ PDEF,Ehoop,EPEL,Z
 ! /XRANGE,contact_radius*0.95,2*contact_radius*1.05
 ! /YRANGE,-stress_maximum*2,+stress_maximum*2
 PLPATH,Stang,Snorm,Shoop,Srad,Saxi,Stan
-
-! Save current path into an array
-PAGET,path_surface,TABLE
-ALLSEL,ALL
 
 /COM,---------------------------------------------------------------------------
 /COM,PLOT PATH CRACK
@@ -271,3 +329,5 @@ PAGET,path_crack,TABLE
 ALLSEL,ALL
 
 *ENDIF
+
+:ende

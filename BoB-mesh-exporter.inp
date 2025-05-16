@@ -1,0 +1,228 @@
+/COM,===========================================================================
+/COM,MODEL WITHOUT A CRACK SOLUTION
+/COM,===========================================================================
+
+/POST1
+/UIS,MSGPOP,3
+
+/COM,---------------------------------------------------------------------------
+/COM,COMPONENTS
+/COM,---------------------------------------------------------------------------
+
+! Lower ball areas
+CMSEL,S,area_ball_lower,AREA
+! Lower ball elements
+ESLA,S $ ESEL,R,TYPE,,element_structural
+CM,elements_ball_lower,ELEM
+! Lower ball nodes
+NSLE,S,CORNER
+CM,nodes_ball_lower,NODE
+
+*IF,simulate_two_balls,EQ,true,THEN
+! Upper ball areas
+CMSEL,S,area_ball_upper,AREA
+! Upper ball elements
+ESLA,S $ ESEL,R,TYPE,,element_structural
+CM,elements_ball_upper,ELEM
+! Upper ball nodes
+NSLE,S,CORNER
+CM,nodes_ball_upper,NODE
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,MASKS
+/COM,---------------------------------------------------------------------------
+
+! Masks
+CMSEL,S,elements_ball_lower,ELEM $ *VGET,mask_elements_lower,ELEM,,ESEL
+CMSEL,S,nodes_ball_lower,NODE $ *VGET,mask_nodes_lower,NODE,,NSEL
+
+*IF,simulate_two_balls,EQ,true,THEN
+CMSEL,S,elements_ball_upper,ELEM $ *VGET,mask_elements_upper,ELEM,,ESEL
+CMSEL,S,nodes_ball_upper,NODE $ *VGET,mask_nodes_upper,NODE,,NSEL
+*ENDIF
+
+ALLSEL,ALL
+
+! Number of nodes
+*GET,nodes_count,NODE,,COUNT
+! Number of elements
+*GET,elements_count,ELEM,,COUNT
+
+/COM,---------------------------------------------------------------------------
+/COM,ELEMENTS
+/COM,---------------------------------------------------------------------------
+
+! Element and node indices
+*DEL,elements_list,,NOPR $ *VGET,elements_list,ELEM,,ELIST
+*DEL,nodes_list,,NOPR $ *VGET,nodes_list,NODE,,NLIST
+
+! Associated element numbers
+*DEL,elem_node_1,,NOPR $ *VGET,elem_node_1,ELEM,,NODE,1
+*DEL,elem_node_2,,NOPR $ *VGET,elem_node_2,ELEM,,NODE,2
+*DEL,elem_node_3,,NOPR $ *VGET,elem_node_3,ELEM,,NODE,3
+*DEL,elem_node_4,,NOPR $ *VGET,elem_node_4,ELEM,,NODE,4
+
+/COM,---------------------------------------------------------------------------
+/COM,COORDINATES
+/COM,---------------------------------------------------------------------------
+
+! Lower ball coordinates
+CSYS,cs_ball_lower
+*DEL,radius_ball_lower,,NOPR $ *VGET,radius_ball_lower,NODE,,LOC,X
+*DEL, angle_ball_lower,,NOPR $ *VGET, angle_ball_lower,NODE,,LOC,Y
+
+! Upper ball coordinates
+*IF,simulate_two_balls,EQ,true,THEN
+CSYS,cs_ball_upper
+*DEL,radius_ball_upper,,NOPR $ *VGET,radius_ball_upper,NODE,,LOC,X
+*DEL, angle_ball_upper,,NOPR $ *VGET, angle_ball_upper,NODE,,LOC,Y
+*ENDIF
+
+/COM,---------------------------------------------------------------------------
+/COM,MESH FILE
+/COM,---------------------------------------------------------------------------
+
+! Open the output file
+*CFOPEN,mesh,xml
+
+*VWRITE,
+<mesh>
+
+*VWRITE,
+<ball_lower>
+*VWRITE,
+<nodes>
+*VMASK,mask_nodes_lower
+*VWRITE,nodes_list(1),radius_ball_lower(1),angle_ball_lower(1)
+<node id="%i" r="%.6f" ph="%.6f" />
+*VWRITE,
+</nodes>
+*VWRITE,
+<elements>
+*VMASK,mask_elements_lower
+*VWRITE,elements_list(1),elem_node_1(1),elem_node_2(1),elem_node_3(1),elem_node_4(1)
+<element id="%i" n1="%i" n2="%i" n3="%i" n4="%i" />
+*VWRITE,
+</elements>
+*VWRITE,
+</ball_lower>
+
+*IF,simulate_two_balls,EQ,true,THEN
+*VWRITE,
+<ball_upper>
+*VWRITE,
+<nodes>
+*VMASK,mask_nodes_upper
+*VWRITE,nodes_list(1),radius_ball_upper(1),angle_ball_upper(1)
+<node id="%i" r="%.6f" t="%.6f" />
+*VWRITE,
+</nodes>
+*VWRITE,
+<elements>
+*VMASK,mask_elements_upper
+*VWRITE,elements_list(1),elem_node_1(1),elem_node_2(1),elem_node_3(1),elem_node_4(1)
+<element id="%i" n1="%i" n2="%i" n3="%i" n4="%i" />
+*VWRITE,
+</elements>
+*VWRITE,
+</ball_upper>
+*ENDIF
+
+*VWRITE,
+</mesh>
+
+! Close file
+*CFCLOS
+
+/COM,---------------------------------------------------------------------------
+/COM,NODAL RESULTS FILE
+/COM,---------------------------------------------------------------------------
+
+*GET,substeps_count,ACTIVE,,SET,NSET,LAST,1
+*DO,current_substep,1,substeps_count
+
+! Retrive results for substep
+SET,,,,,,,current_substep
+! Get current time
+*GET,current_time,ACTIVE,,SET,TIME
+! Calculate current force
+*SET,current_force,current_time*force
+
+! Lower ball stresses
+RSYS,cs_ball_lower
+*VGET,stress_lower_radial    ,NODE,,S,X
+*VGET,stress_lower_tangential,NODE,,S,Y
+*VGET,stress_lower_hoop      ,NODE,,S,Z
+*VGET,stress_lower_first     ,NODE,,S,1
+*VGET,stress_lower_second    ,NODE,,S,2
+*VGET,stress_lower_third     ,NODE,,S,3
+! Lower ball strains
+*VGET,strain_lower_radial    ,NODE,,EPEL,X
+*VGET,strain_lower_tangential,NODE,,EPEL,Y
+*VGET,strain_lower_hoop      ,NODE,,EPEL,Z
+
+*IF,simulate_two_balls,EQ,true,THEN
+! Upper ball stresses
+RSYS,cs_ball_upper
+*VGET,stress_upper_radial    ,NODE,,S,X
+*VGET,stress_upper_tangential,NODE,,S,Y
+*VGET,stress_upper_hoop      ,NODE,,S,Z
+*VGET,stress_upper_first     ,NODE,,S,1
+*VGET,stress_upper_second    ,NODE,,S,2
+*VGET,stress_upper_third     ,NODE,,S,3
+! Upper ball strains
+*VGET,strain_upper_radial    ,NODE,,EPEL,X
+*VGET,strain_upper_tangential,NODE,,EPEL,Y
+*VGET,strain_upper_hoop      ,NODE,,EPEL,Z
+*ENDIF
+
+! /COM,---------------------------------------------------------------------------
+! /COM,OPEN FILE
+! /COM,---------------------------------------------------------------------------
+
+*DEL,filename,,NOPR
+*DIM,filename,STRING,128
+*SET,filename(1),'result-%CHRVAL(current_time)%'
+
+! Open the output file
+*CFOPEN,filename(1),xml
+
+*VWRITE,current_force/newton
+<result F="%8.1f">
+
+*VWRITE,
+<ball_lower>
+*VWRITE,
+<nodes>
+*VMASK,mask_nodes_lower
+*VWRITE,nodes_list(1),stress_lower_radial(1),stress_lower_tangential(1),stress_lower_hoop(1),stress_lower_first(1),stress_lower_second(1),stress_lower_third(1),strain_lower_radial(1),strain_lower_tangential(1),strain_lower_hoop(1)
+<node id="%i" Srad="%.1f" Stang="%.1f" Shoop="%.1f" Si="%.1f" Sii="%.1f" Siii="%.1f" Erad="%.6f" Etang="%.6f" Ehoop="%.6f" />
+*VWRITE,
+</nodes>
+*VWRITE,
+</ball_lower>
+
+*IF,simulate_two_balls,EQ,true,THEN
+*VWRITE,
+<ball_upper>
+*VWRITE,
+<nodes>
+*VMASK,mask_nodes_upper
+*VWRITE,nodes_list(1),stress_upper_radial(1),stress_upper_tangential(1),stress_upper_hoop(1),stress_upper_first(1),stress_upper_second(1),stress_upper_third(1),strain_upper_radial(1),strain_upper_tangential(1),strain_upper_hoop(1)
+<node id="%i" Srad="%.1f" Stang="%.1f" Shoop="%.1f" Si="%.1f" Sii="%.1f" Siii="%.1f" Erad="%.6f" Etang="%.6f" Ehoop="%.6f" />
+*VWRITE,
+</nodes>
+*VWRITE,
+*VWRITE,
+</ball_upper>
+*ENDIF
+
+*VWRITE,
+</result>
+
+! Close file
+*CFCLOS
+
+*ENDDO
+/UIS,MSGPOP,0

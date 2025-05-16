@@ -7,7 +7,8 @@
 
 ! Configuration files
 ! /INPUT,BoB-2-configuration-Pasterk,inp
-/INPUT,BoB-2-configuration-Munz,inp
+! /INPUT,BoB-2-configuration-Munz,inp
+/INPUT,BoB-2-configuration-Lech,inp
 
 ! Hertz theory
 /INPUT,BoB-3-Hertz,inp
@@ -27,11 +28,15 @@
 
 ! Crackless state
 /INPUT,BoB-8-crackless-1-solution,inp
-/INPUT,BoB-8-crackless-2-results,inp
-/INPUT,BoB-8-crackless-3-export,inp
+*IF,covergence_status,EQ,converged,THEN
+! /INPUT,BoB-8-crackless-2-results,inp
+! /INPUT,BoB-8-crackless-3-export,inp
+*ENDIF
 
-! ! Energy evolution with crack growth
-! /INPUT,BoB-9-cracked,inp
+! Energy evolution with crack growth
+*IF,simulate_cracks,EQ,true,THEN
+/INPUT,BoB-9-cracked,inp
+*ENDIF
 
 ! ! Export of results
 ! /INPUT,BoB-8-stress-export,inp

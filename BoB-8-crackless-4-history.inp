@@ -38,6 +38,7 @@ ALLSEL,ALL
 /COM,---------------------------------------------------------------------------
 
 ! Number of substeps
+SET,1,LAST
 *GET,count_substeps,ACTIVE,0,SOLU,NCMSS
 
 ! Loop over substeps
@@ -49,15 +50,5 @@ ALLSEL,ALL
 	! Retrieve tangential stress
 	RSYS,cs_ball_lower $ *VGET,stress_lower,NODE,,S,Y
 	RSYS,cs_ball_upper $ *VGET,stress_upper,NODE,,S,Y
-
-	*IF,substep,EQ,1,THEN
-		! Create the envelope
-		*VFUN,stress_lower_envelope,COPY,stress_lower
-		*VFUN,stress_upper_envelope,COPY,stress_upper
-	*ELSE
-		! Update the envelope
-		*VOPER,stress_lower_envelope,stress_lower_envelope,MAX,stress_lower
-		*VOPER,stress_upper_envelope,stress_upper_envelope,MAX,stress_upper
-	*ENDIF
 
 *ENDDO
